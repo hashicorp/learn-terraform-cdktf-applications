@@ -2,6 +2,12 @@
 
 Note: Still very much WIP/rough notes, not ready to run yet.
 
+1. Create cluster
+
+    ```sh
+    kind create cluster --name=cdktf-app
+    ```
+
 1. Install CDKTF libraries, CLI, and constructs (peer dependency)
 
     ```sh
@@ -42,6 +48,24 @@ Note: Still very much WIP/rough notes, not ready to run yet.
 }
 ```
 
+1. Run cdktf get
+
+    ```sh
+    cdktf get
+    ```
+
+1. Synth
+
+    ```sh
+    cdktf synth
+    ```
+
+1. Deploy
+
+    ```sh
+    cdktf deploy
+    ```
+
 
 <!-- Skip, or find a k8s example that works cleanly
 
@@ -73,10 +97,3 @@ new docker.Image(this, "zoo", {
 });
 ``` -->
 
-1. main.ts:
-
-```
-FIXME
-```
-
-1. 
