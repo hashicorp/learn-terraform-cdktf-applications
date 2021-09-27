@@ -34,19 +34,19 @@ Note: Still very much WIP/rough notes, not ready to run yet.
 
 1. Add provider to `cdktf.json`:
 
-```
-{
-  "language": "typescript",
-  "app": "npm run --silent compile && node main.js",
-  "projectId": "9e131c9e-f878-4dde-84dd-88218e539bea",
-  "terraformProviders": ["hashicorp/kubernetes ~> 2.5.0"],
-  "terraformModules": [],
-  "context": {
-    "excludeStackIdFromLogicalIds": "true",
-"allowSepCharsInLogicalIds": "true"
-  }
-}
-```
+    ```json
+    {
+      "language": "typescript",
+      "app": "npm run --silent compile && node main.js",
+      "projectId": "9e131c9e-f878-4dde-84dd-88218e539bea",
+      "terraformProviders": ["hashicorp/kubernetes ~> 2.5.0"],
+      "terraformModules": [],
+      "context": {
+        "excludeStackIdFromLogicalIds": "true",
+    "allowSepCharsInLogicalIds": "true"
+      }
+    }
+    ```
 
 1. Run cdktf get
 
