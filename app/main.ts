@@ -2,39 +2,59 @@ import { Construct } from "constructs";
 import { App, TerraformStack } from "cdktf";
 import {
   KubernetesProvider,
-//  Deployment,
+  Deployment,
   // Ingress,
-  Pod,
+  //  Pod,
   Service,
-  } from "@cdktf/provider-kubernetes";
+} from "@cdktf/provider-kubernetes";
 
 class MyStack extends TerraformStack {
   constructor(scope: Construct, name: string) {
     super(scope, name);
 
     new KubernetesProvider(this, "kind", {
-      configPath: "~/.kube/config"
+      configPath: "~/.kube/config",
     });
 
-    new Pod(this, "myapp-pod", {
+    new Deployment(this, "myapp-deployment", {
       metadata: [
         {
-          labels:
-            {
-              app: "myapp",
-            },
+          labels: {
+            app: "myapp",
+          },
           name: "myapp",
         },
       ],
       spec: [
         {
-          container: [
+          replicas: "2",
+          selector: [
             {
-              image: "nginx:latest",
-              name: "myapp",
-              port: [
+              matchLabels: { app: "myapp" },
+            },
+          ],
+          template: [
+            {
+              metadata: [
                 {
-                  containerPort: 80,
+                  labels: {
+                    app: "myapp",
+                  },
+                },
+              ],
+              spec: [
+                {
+                  container: [
+                    {
+                      image: "nginx:latest",
+                      name: "myapp",
+                      port: [
+                        {
+                          containerPort: 80,
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
@@ -54,19 +74,17 @@ class MyStack extends TerraformStack {
           type: "NodePort",
           port: [
             {
-              port: 8080,
-              targetPort: "80",
+              port: 80,
+              targetPort: "8080",
               protocol: "TCP",
             },
           ],
-          selector:
-            {
-              app: "myapp",
-            },
+          selector: {
+            app: "myapp",
+          },
         },
       ],
     });
-
 
     // new Ingress(this, "myapp-ingress", {
     //   metadata: [
