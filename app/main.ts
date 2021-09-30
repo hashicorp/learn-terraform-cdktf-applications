@@ -47,6 +47,7 @@ class MyStack extends TerraformStack {
                   container: [
                     {
                       image: "nginx:latest",
+//                      imagePullPolicy: "never", // for local images
                       name: "myapp",
                       port: [
                         {
@@ -75,8 +76,9 @@ class MyStack extends TerraformStack {
           port: [
             {
               port: 80,
-              targetPort: "8080",
-              protocol: "TCP",
+              targetPort: "80",
+              nodePort: 30001,
+              protocol: "TCP"
             },
           ],
           selector: {
