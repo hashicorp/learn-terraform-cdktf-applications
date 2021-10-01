@@ -2,10 +2,37 @@
 
 Note: Still very much WIP/rough notes, not ready to run yet.
 
+1. Run a local docker registry
+    See docs/script at: https://kind.sigs.k8s.io/docs/user/local-registry/
+
+    Is it running?
+
+    ```sh
+    docker ps --filter name=local-registry
+    ```
+
+    No?
+
+    ```sh
+    docker run -d --restart=always -p "127.0.0.1:5000:5000" --name local-registry registry:2
+    ```
+
 1. Create cluster
 
     ```sh
     kind create cluster --name=cdktf-app --config=kind-config.yaml
+    ```
+
+1. Attach local registry to kind's network.
+
+    ```sh
+    docker network connect kind local-registry
+    ```
+
+1. Add configmap for registry.
+
+    ```sh
+    kubectl apply -f local-registry-configmap.yaml
     ```
 
 1. Install CDKTF libraries, CLI, and constructs (peer dependency)

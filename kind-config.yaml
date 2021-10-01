@@ -1,8 +1,15 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+      endpoint = ["http://local-registry:5000"]
 nodes:
   - role: control-plane
     extraPortMappings:
       - containerPort: 30001
         hostPort: 30001
+        listenAddress: "0.0.0.0"
+      - containerPort: 30002
+        hostPort: 30002
         listenAddress: "0.0.0.0"

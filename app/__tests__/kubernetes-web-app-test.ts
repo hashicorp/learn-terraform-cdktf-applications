@@ -1,10 +1,40 @@
 import "cdktf/lib/testing/adapters/jest"; // Load types for expect matchers
-// import { Testing } from "cdktf";
+import { Testing } from "cdktf";
+import {
+  Deployment,
+//  Service
+} from "../.gen/providers/kubernetes";
+import { SimpleWebApp } from "../constructs";
+import "cdktf/lib/testing/adapters/jest"; // This is needed to get Typescript types for the new matchers
 
-describe("My CDKTF Application", () => {
+describe("Our CDKTF Constructs", () => {
+  
+  describe("SimpleWebApp", () => {
+    it("should contain a deployment", () => {
+      expect(
+        Testing.synthScope((scope) => {
+          new SimpleWebApp(scope, "frontend", {
+            image: "nginx:latest",
+            replicas: "4",
+            port: 30001,
+            appName: "myapp"  
+          });
+        })
+      ).toHaveResource(Deployment);
+    });
+  
+    // it("should use an ubuntu image", () => {
+    //   expect(
+    //     Testing.synthScope((scope) => {
+    //       new MyApplicationsAbstraction(scope, "my-app", {});
+    //     })
+    //   ).toHaveResourceWithProperties(Image, { name: "ubuntu:latest" });
+    // });
+  });
+  
   // The tests below are example tests, you can find more information at
   // https://github.com/hashicorp/terraform-cdk/blob/main/docs/working-with-cdk-for-terraform/testing.md
-  it.todo("should be tested");
+//  it.todo("should be tested");
 
   // // All Unit testst test the synthesised terraform code, it does not create real-world resources
   // describe("Unit testing using assertions", () => {
