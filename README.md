@@ -563,8 +563,8 @@ Very much a WIP.
      (http://localhost:30001 - service might take a few seconds to deploy, but should now be terranomo)
 
 1. TODO:
-  1. Lots of cleanup
-  1. Deploy frontend/backend that talk to each other
-  1. Deploy another "stack"
-  1. Deploy app on public cloud
+    1. Lots of cleanup
+    1. Deploy frontend/backend that talk to each other
+    1. Deploy another "stack"
+    1. Deploy app on public cloud
 
