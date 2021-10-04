@@ -43,9 +43,16 @@ export class KubernetesDeployment extends Construct {
     this.resource = new Deployment(this, name, {
       metadata: [
         {
-          labels: {
-            app: config.appName,
-          },
+          labels:
+// FIXME: `cat ../k8s_deployment.tf | cdktf convert` generates this as a list `[]`, but
+// the provider bindings require just the object `{}`.
+//
+//          [
+            {
+              app: config.appName,
+              environment: "dev",
+            },
+//          ],
           name: config.appName,
         },
       ],
@@ -54,7 +61,13 @@ export class KubernetesDeployment extends Construct {
           replicas: config.replicas,
           selector: [
             {
-              matchLabels: { app: config.appName },
+              matchLabels:
+//              [
+                {
+                  environment: "dev",
+                  app: config.appName
+                },
+//              ],
             },
           ],
           template: [
@@ -63,6 +76,7 @@ export class KubernetesDeployment extends Construct {
                 {
                   labels: {
                     app: config.appName,
+                    environment: "dev"
                   },
                 },
               ],
@@ -73,11 +87,11 @@ export class KubernetesDeployment extends Construct {
                       image: config.image,
 //                      imagePullPolicy: "never", // for local images
                       name: config.appName,
-                      port: [
-                        {
-                          containerPort: 80,
-                        },
-                      ],
+                      // port: [
+                      //   {
+                      //     containerPort: 80,
+                      //   },
+                      // ],
                     },
                   ],
                 },
