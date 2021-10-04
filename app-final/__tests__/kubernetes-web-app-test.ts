@@ -1,30 +1,29 @@
-import "cdktf/lib/testing/adapters/jest"; // Load types for expect matchers
+import "cdktf/lib/testing/adapters/jest";
 import { Testing } from "cdktf";
 import * as kubernetes from "../.gen/providers/kubernetes";
 import {
-  KubernetesWebAppDeployment,
-  KubernetesNodePortService,
-} from "../constructs";
-import "cdktf/lib/testing/adapters/jest"; // This is needed to get Typescript types for the new matchers
+    KubernetesWebAppDeployment,
+    KubernetesNodePortService,
+  } from "../constructs";
+import "cdktf/lib/testing/adapters/jest";
 
 describe("Our CDKTF Constructs", () => {
-  
-  describe("KubernetesDeployment", () => {
+
+describe("KubernetesWebAppDeployment", () => {
     it("should contain a deployment resource", () => {
-      expect(
+    expect(
         Testing.synthScope((scope) => {
-          new KubernetesWebAppDeployment(scope, "myapp-frontend-dev", {
+        new KubernetesWebAppDeployment(scope, "myapp-frontend-dev", {
             image: "nginx:latest",
             replicas: "4",
             appName: "myapp",
             environment: "dev"
-          });
+        });
         })
-      ).toHaveResource(kubernetes.Deployment);
+    ).toHaveResource(kubernetes.Deployment);
     });
-  });
-
-  describe("KubernetesNodePortService", () => {
+});
+describe("KubernetesNodePortService", () => {
     it("should contain a Service resource", () => {
       expect(
         Testing.synthScope((scope) => {
@@ -37,4 +36,5 @@ describe("Our CDKTF Constructs", () => {
       ).toHaveResource(kubernetes.Service);
     });
   });
+
 });

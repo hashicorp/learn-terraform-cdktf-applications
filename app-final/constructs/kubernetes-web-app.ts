@@ -10,33 +10,34 @@ export interface KubernetesWebAppDeploymentConfig {
 };
 
 export interface KubernetesNodePortServiceConfig {
-  readonly port: number;
-  readonly appName: string;
-  readonly environment: string;
+    readonly port: number;
+    readonly appName: string;
+    readonly environment: string;
 };
 
 export class SimpleKubernetesWebApp extends Construct {
-  public readonly deployment: KubernetesWebAppDeployment;
-  public readonly service: KubernetesNodePortService;
-  public readonly config: KubernetesWebAppDeploymentConfig & KubernetesNodePortServiceConfig;
+    public readonly deployment: KubernetesWebAppDeployment;
+    public readonly service: KubernetesNodePortService;
+    public readonly config: KubernetesWebAppDeploymentConfig & KubernetesNodePortServiceConfig;
 
-  constructor(scope: Construct, name: string, config: KubernetesWebAppDeploymentConfig & KubernetesNodePortServiceConfig) {
-    super(scope, name);
+    constructor(scope: Construct, name: string, config: KubernetesWebAppDeploymentConfig & KubernetesNodePortServiceConfig) {
+        super(scope, name);
 
-    this.config = config;
-    this.deployment = new KubernetesWebAppDeployment(this, name + "-deployment",
-      {image: config.image, replicas: config.replicas, appName: config.appName, environment: config.environment}
-    );
+        this.config = config;
+        this.deployment = new KubernetesWebAppDeployment(this, name + "-deployment",
+        {image: config.image, replicas: config.replicas, appName: config.appName, environment: config.environment}
+        );
 
-    this.service = new KubernetesNodePortService(this, name + "-service",
-      {port: config.port, appName: config.appName, environment: config.environment}
-    );
+        this.service = new KubernetesNodePortService(this, name + "-service",
+          {port: config.port, appName: config.appName, environment: config.environment}
+        );
 
-    new TerraformOutput(this, name + "-frontend-url", {
-      value: "http://localhost:" + config.port.toString(),
-    });
-  }
-}
+        new TerraformOutput(this, "frontend_url", {
+            value: "http://localhost:" + config.port.toString(),
+          });
+      
+    }
+};
 
 export class KubernetesWebAppDeployment extends Construct {
   public readonly resource: kubernetes.Deployment;
@@ -97,33 +98,32 @@ export class KubernetesWebAppDeployment extends Construct {
 
 export class KubernetesNodePortService extends Construct {
     public readonly resource: kubernetes.Service;
-  
+
     constructor(scope: Construct, name: string, config: KubernetesNodePortServiceConfig) {
-      super(scope, name);
-  
-      this.resource = new kubernetes.Service(this, name, {
+    super(scope, name);
+
+    this.resource = new kubernetes.Service(this, name, {
         metadata: [
-          {
+        {
             name: config.appName,
-          },
+        },
         ],
         spec: [
-          {
+        {
             type: "NodePort",
             port: [
-              {
+            {
                 port: 80,
                 targetPort: "80",
                 nodePort: config.port,
                 protocol: "TCP"
-              },
+            },
             ],
             selector: {
-              app: config.appName,
+            app: config.appName,
             },
-          },
+        },
         ],
-      });
+    });
     };
-  };
-  
+};    

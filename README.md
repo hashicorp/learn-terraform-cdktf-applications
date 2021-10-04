@@ -116,13 +116,15 @@ Final version in `app-final`, or follow these steps:
 
     Note: Output needs to be tweaked before incorporating into code.
     
-    1. Replace `// define resources here` in `main.ts` with 
+    1. Replace `// define resources here` in `app/main.ts` with 
        `new kubernetes.Deployment(this, name + "-deployment", { ... });`.
+       1. Change `"myapp"` to `name + "-deployment"` ^
+    1. Add import `import * as kubernetes from "./.gen/providers/kubernetes";`
+       to imports near top of file.
+    1. Add import `import * as path from 'path';` to imports near top of file.       
     1. Remove extra `[]` from `metadata.labels`, `spec.selector.matchLabels`,
        and `spec.template.metadata.labels` in `Deployment` config.
-    1. Add import `import * as kubernetes from "./.gen/providers/kubernetes";`
-       to top of file.
-    1. Add import `import * as path from 'path';` to top of file.
+       1. Syntax highlighting should show where errors are.
     1. Add k8s provider (above `Deployment` block).
         ```typescript
         new kubernetes.KubernetesProvider(this, "kind", {
@@ -173,7 +175,7 @@ Final version in `app-final`, or follow these steps:
     mkdir constructs
     ```
 
-    In `constructs/kubernetes-web-app.ts`:
+    Add new file `constructs/kubernetes-web-app.ts`:
 
     ```typescript
     import { Construct } from "constructs";
@@ -266,8 +268,6 @@ Final version in `app-final`, or follow these steps:
     );
     ```
 
-    Synth:
-
     Deploy:
 
     ```sh
@@ -276,14 +276,14 @@ Final version in `app-final`, or follow these steps:
 
 1. Add a test.
 
-   First, configure testing in `app/jest.setup.js`:
+   First, configure testing in new file `app/jest.setup.js`:
 
    ```javascript
     const cdktf = require("cdktf");
     cdktf.Testing.setupJest();
    ```
 
-   Create `__tests__/kubernetes-web-app-test.ts`.
+   Create new file `__tests__/kubernetes-web-app-test.ts`.
 
     ```typescript
     import "cdktf/lib/testing/adapters/jest";
@@ -325,18 +325,19 @@ Final version in `app-final`, or follow these steps:
     npm run test:watch
     ```
 
-    (Open a new tab).
+    (Open a new tab to run further commands).
 
 1. Now, `nginx:latest` is runnning in your deployment, but it isn't available.
    Add a kubernetes `Service` to do so. In
    `app/constructs/kubernetes-web-app.ts`.
 
-   Add interface for our service.
+   Add interface for service.
 
     ```typescript
     export interface KubernetesNodePortServiceConfig {
       readonly port: number;
       readonly appName: string;
+      readonly environment: string;
     };
     ```
 
@@ -378,6 +379,8 @@ Final version in `app-final`, or follow these steps:
 
    Now add a test to `app/__tests__/kubernetes-web-app.ts`.
 
+   Update imports w/ service:
+
     ```typescript
     import {
       KubernetesWebAppDeployment,
@@ -403,13 +406,21 @@ Final version in `app-final`, or follow these steps:
     });
     ```
 
-   Check to make sure the test still pass in `npm run test:watch` command.
+   Check to make sure the test still pass in `npm run test:watch` command. (2 tests passed)
+
+   Add service to `app/main.tf`:
+
+    ```typescript
+    new KubernetesNodePortService(this, name + "-service",
+      {port: 30001, appName: "myapp", environment: "dev"}
+    );
+    ```
 
    Deploy:
 
-   ```sh
-   cdktf deploy
-   ```
+    ```sh
+    cdktf deploy
+    ```
 
    Visit `localhost:30001` to see nginx hello world page. Might take a minute or
    two before it's available.
@@ -448,7 +459,7 @@ Final version in `app-final`, or follow these steps:
     } from './constructs';
     ```
 
-    And Replace the old constructs with the new one:
+    And replace the old constructs with the new one:
 
     ```typescript
     new SimpleKubernetesWebApp(this, name + "-frontend", {
@@ -472,7 +483,7 @@ Final version in `app-final`, or follow these steps:
     ⠹ Deploying Stack: app
     ```
 
-    FIXME: Is this a bug ^^ ?
+    FIXME: This is because it tries to create the new service before destroying the old one. Is this a bug ^^ ?
 
     Watch: (Maybe start this earlier)
  
@@ -482,13 +493,15 @@ Final version in `app-final`, or follow these steps:
 
     Visit `localhost:30001` to see nginx page.
 
-    Add an output, to `constructs/kubernetes-web-app.ts`:
+    Add an output, to `constructs/kubernetes-web-app.ts`.
+
+    Add near top of file:
 
     ```typescript
     import { TerraformOutput } from "cdktf";
     ```
 
-    Inside `constructor({...});`:
+    Add inside SimpleKubernetesWebApp's `constructor({...});`:
 
     ```typescript
     new TerraformOutput(this, "frontend_url", {
@@ -545,7 +558,7 @@ Final version in `app-final`, or follow these steps:
     cdktf deploy
     ```
 
-     (http://localhost:30001 should now be terranomo)
+     (http://localhost:30001 - service might take a few seconds to deploy, but should now be terranomo)
 
 1. TODO:
   1. Lots of cleanup

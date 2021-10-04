@@ -1,7 +1,7 @@
 {
   "language": "typescript",
   "app": "npm run --silent compile && node main.js",
-  "projectId": "fb2cbbbf-8ac5-4f8e-bcf3-edb927f5a46c",
+  "projectId": "a38366c5-f72b-4474-ab7b-d571066f76ee",
   "terraformProviders": ["hashicorp/kubernetes@ ~> 2.5.0"],
   "terraformModules": [],
   "context": {
