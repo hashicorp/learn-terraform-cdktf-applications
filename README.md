@@ -1,5 +1,7 @@
 # Develop applications with CDKTF
 
+Very much a WIP.
+
 ## Lab system setup/prerequisites
 
 1. Install & run Docker.
@@ -59,7 +61,7 @@
     npm install -g cdktf-cli@latest cdktf@latest constructs@^10.0.0
     ```
 
-Final version in `app-final`, or follow these steps:
+**Note:** Final version is in `app-final`, or follow these steps:
 
 1. Create & go into the app directory.
 
