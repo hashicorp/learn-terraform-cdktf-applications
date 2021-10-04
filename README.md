@@ -116,7 +116,7 @@ Very much a WIP.
     cat ../k8s_deployment.tf | cdktf convert
     ```
 
-    Note: Output needs to be tweaked before incorporating into code.
+    **Note:** Output needs to be tweaked before incorporating into code:
     
     1. Replace `// define resources here` in `app/main.ts` with 
        `new kubernetes.Deployment(this, name + "-deployment", { ... });`.
@@ -152,7 +152,7 @@ Very much a WIP.
     kubectl get pods --kubeconfig ../kubeconfig.yaml
     ```
 
-1. Ask for four replicas, redeploy.
+1. Ask for four replicas in `app/main.tf`, redeploy.
 
     ```typescript
     //          replicas: "1",
@@ -330,8 +330,8 @@ Very much a WIP.
     (Open a new tab to run further commands).
 
 1. Now, `nginx:latest` is runnning in your deployment, but it isn't available.
-   Add a kubernetes `Service` to do so. In
-   `app/constructs/kubernetes-web-app.ts`.
+   Add a kubernetes `Service` configured as a NodePort to make it available on
+   port 30001. In `app/constructs/kubernetes-web-app.ts`.
 
    Add interface for service.
 
