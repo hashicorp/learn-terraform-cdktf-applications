@@ -546,7 +546,7 @@ Very much a WIP.
     ```typescript
     new SimpleKubernetesWebApp(this, name + "-frontend", {
       image: "localhost:5000/nocorp-frontend:latest",
-//      image: "nginx:latest",
+    // image: "nginx:latest",
       replicas: "2",
       port: 30001,
       appName: "myapp-frontend",
