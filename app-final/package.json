@@ -1,5 +1,5 @@
 {
-  "name": "app-final",
+  "name": "app",
   "version": "1.0.0",
   "main": "main.js",
   "types": "main.ts",
@@ -20,6 +20,7 @@
     "node": ">=10.12"
   },
   "dependencies": {
+    "@cdktf/provider-docker": "^0.3.10",
     "@cdktf/provider-kubernetes": "^0.3.10",
     "cdktf": "^0.6.4",
     "constructs": "^10.0.5"

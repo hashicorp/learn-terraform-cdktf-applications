@@ -7,123 +7,147 @@ export interface KubernetesWebAppDeploymentConfig {
   readonly replicas: string;
   readonly appName: string;
   readonly environment: string;
-};
+  readonly env?: Record<string, string>;
+}
 
 export interface KubernetesNodePortServiceConfig {
-    readonly port: number;
-    readonly appName: string;
-    readonly environment: string;
-};
+  readonly port: number;
+  readonly appName: string;
+  readonly environment: string;
+}
 
 export class SimpleKubernetesWebApp extends Construct {
-    public readonly deployment: KubernetesWebAppDeployment;
-    public readonly service: KubernetesNodePortService;
-    public readonly config: KubernetesWebAppDeploymentConfig & KubernetesNodePortServiceConfig;
+  public readonly deployment: KubernetesWebAppDeployment;
+  public readonly service: KubernetesNodePortService;
+  public readonly config: KubernetesWebAppDeploymentConfig &
+    KubernetesNodePortServiceConfig;
 
-    constructor(scope: Construct, name: string, config: KubernetesWebAppDeploymentConfig & KubernetesNodePortServiceConfig) {
-        super(scope, name);
+  constructor(
+    scope: Construct,
+    name: string,
+    config: KubernetesWebAppDeploymentConfig & KubernetesNodePortServiceConfig
+  ) {
+    super(scope, name);
 
-        this.config = config;
-        this.deployment = new KubernetesWebAppDeployment(this, name + "-deployment",
-        {image: config.image, replicas: config.replicas, appName: config.appName, environment: config.environment}
-        );
+    this.config = config;
+    this.deployment = new KubernetesWebAppDeployment(
+      this,
+      `${name}-deployment`,
+      {
+        image: config.image,
+        replicas: config.replicas,
+        appName: config.appName,
+        environment: config.environment,
+        env: config.env
+      }
+    );
 
-        this.service = new KubernetesNodePortService(this, name + "-service",
-          {port: config.port, appName: config.appName, environment: config.environment}
-        );
+    this.service = new KubernetesNodePortService(this, `${name}-service`, {
+      port: config.port,
+      appName: config.appName,
+      environment: config.environment,
+    });
 
-        new TerraformOutput(this, "frontend_url", {
-            value: "http://localhost:" + config.port.toString(),
-          });
-      
-    }
-};
+    new TerraformOutput(this, `${name}-frontend-url`, {
+      value: `http://localhost:${config.port}`,
+    });
+  }
+}
 
 export class KubernetesWebAppDeployment extends Construct {
   public readonly resource: kubernetes.Deployment;
 
-  constructor(scope: Construct, name: string, config: KubernetesWebAppDeploymentConfig) {
+  constructor(
+    scope: Construct,
+    name: string,
+    config: KubernetesWebAppDeploymentConfig
+  ) {
     super(scope, name);
 
     this.resource = new kubernetes.Deployment(this, name, {
-    metadata: [
+      metadata: [
         {
-        labels:
-            {
+          labels: {
             app: config.appName,
             environment: config.environment,
-            },
-        name: config.appName,
+          },
+          name: config.appName,
         },
-    ],
-    spec: [
+      ],
+      spec: [
         {
-        replicas: config.replicas,
-        selector: [
+          replicas: config.replicas,
+          selector: [
             {
-            matchLabels:
-                {
+              matchLabels: {
                 environment: config.environment,
-                app: config.appName
-                },
+                app: config.appName,
+              },
             },
-        ],
-        template: [
+          ],
+          template: [
             {
-            metadata: [
+              metadata: [
                 {
-                labels: {
+                  labels: {
                     app: config.appName,
-                    environment: config.environment
+                    environment: config.environment,
+                  },
                 },
-                },
-            ],
-            spec: [
+              ],
+              spec: [
                 {
-                container: [
+                  container: [
                     {
-                    image: config.image,
-                    name: config.appName,
+                      image: config.image,
+                      name: config.appName,
+// FIXME: I'm certain this is just my lack of typescript skills. This is close (I think?), but does not work:
+//                      env: Object.entries(config.env).map(([n, v]) => new Object({ name: n, value: v}))
+// Error: Type 'Object[]' is not assignable to type 'DeploymentSpecTemplateSpecContainerEnv[]'.
                     },
-                ],
+                  ],
                 },
-            ],
+              ],
             },
-        ],
+          ],
         },
-    ],
+      ],
     });
+  }
 }
-};
 
 export class KubernetesNodePortService extends Construct {
-    public readonly resource: kubernetes.Service;
+  public readonly resource: kubernetes.Service;
 
-    constructor(scope: Construct, name: string, config: KubernetesNodePortServiceConfig) {
+  constructor(
+    scope: Construct,
+    name: string,
+    config: KubernetesNodePortServiceConfig
+  ) {
     super(scope, name);
 
     this.resource = new kubernetes.Service(this, name, {
-        metadata: [
+      metadata: [
         {
-            name: config.appName,
+          name: config.appName,
         },
-        ],
-        spec: [
+      ],
+      spec: [
         {
-            type: "NodePort",
-            port: [
+          type: "NodePort",
+          port: [
             {
-                port: 80,
-                targetPort: "80",
-                nodePort: config.port,
-                protocol: "TCP"
+              port: 80,
+              targetPort: "80",
+              nodePort: config.port,
+              protocol: "TCP",
             },
-            ],
-            selector: {
+          ],
+          selector: {
             app: config.appName,
-            },
+          },
         },
-        ],
+      ],
     });
-    };
-};    
+  }
+}

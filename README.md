@@ -1,7 +1,5 @@
 # Develop applications with CDKTF
 
-Very much a WIP.
-
 ## Lab system setup/prerequisites
 
 1. Install & run Docker.
@@ -19,7 +17,30 @@ Very much a WIP.
     docker ps --filter name=local-registry
     ```
 
-    No?
+   No?
+
+   <!-- 
+   FIXME: Probably not needed: registry with auth
+
+   Make Auth dir:
+
+    ```sh
+    mkdir auth
+    ```
+
+   Create htpasswd file:
+
+    ```sh
+    docker run --entrypoint htpasswd httpd:2 -Bbn terraform testpassword > auth/htpasswd
+    ```
+
+   Run local registry:
+
+    ```sh
+    docker run -d --restart always -p "127.0.0.1:5000:5000" --name local-registry -v "$(pwd)/auth:/auth" -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd registry:2
+    ``` -->
+
+   Run local registry:
 
     ```sh
     docker run -d --restart always -p "127.0.0.1:5000:5000" --name local-registry registry:2
@@ -85,7 +106,10 @@ Very much a WIP.
     npm install @cdktf/provider-kubernetes
     ```
 
-1. Add provider to `cdktf.json`. Should look similar to:
+<!-- 
+   FIXME: Not needed with provider installed from NPM.
+   
+   1. Add provider to `cdktf.json`. Should look similar to:
 
     ```json
     {
@@ -102,10 +126,12 @@ Very much a WIP.
     ```
 
 1. Run cdktf get to generate typescript constructs for the k8s provider.
+   **FIXME:** Is this needed w/ provider installed via NPM?
 
     ```sh
     cdktf get
     ```
+-->
 
 1. Add a Construct representing a Kubernetes Deployment.
 
@@ -121,12 +147,13 @@ Very much a WIP.
     1. Replace `// define resources here` in `app/main.ts` with 
        `new kubernetes.Deployment(this, name + "-deployment", { ... });`.
        1. Change `"myapp"` to `name + "-deployment"` ^
-    1. Add import `import * as kubernetes from "./.gen/providers/kubernetes";`
+    1. Add import `import * as kubernetes from "@cdktf/provider-kubernetes";`
        to imports near top of file.
     1. Add import `import * as path from 'path';` to imports near top of file.       
     1. Remove extra `[]` from `metadata.labels`, `spec.selector.matchLabels`,
        and `spec.template.metadata.labels` in `Deployment` config.
        1. Syntax highlighting should show where errors are.
+       1. **FIXME:** Is there a way to fix/work around this?
     1. Add k8s provider (above `Deployment` block).
         ```typescript
         new kubernetes.KubernetesProvider(this, "kind", {
@@ -139,6 +166,8 @@ Very much a WIP.
     ```sh
     cdktf synth
     ```
+   
+   **FIXME:** `cdktf deploy` always says it's synthesizing. When do we need to run `cdktf synth` first vs just `cdktf deploy`?
 
 1. Deploy
 
@@ -165,7 +194,7 @@ Very much a WIP.
     cdktf deploy
     ```
 
-    Check:
+    Check (Should show 4 pods now, the new three younger than the first one):
 
     ```sh
     kubectl get pods --kubeconfig ../kubeconfig.yaml
@@ -181,7 +210,7 @@ Very much a WIP.
 
     ```typescript
     import { Construct } from "constructs";
-    import * as kubernetes from "../.gen/providers/kubernetes";
+    import * as kubernetes from "@cdktf/provider-kubernetes";
 
     export interface KubernetesWebAppDeploymentConfig {
       readonly image: string;
@@ -265,7 +294,7 @@ Very much a WIP.
     And replace `new kubernetes.Deployment(this, name + "-deployment", { ... });` with construct:
 
     ```typescript
-    new KubernetesWebAppDeployment(this, name + "-deployment", 
+    new KubernetesWebAppDeployment(this, `${name}-deployment`,
       {image: "nginx:latest", replicas: "2", appName: "myapp", environment: "dev"}
     );
     ```
@@ -294,7 +323,6 @@ Very much a WIP.
     import {
       KubernetesWebAppDeployment,
     } from "../constructs";
-    import "cdktf/lib/testing/adapters/jest";
 
     describe("Our CDKTF Constructs", () => {
     
@@ -329,11 +357,11 @@ Very much a WIP.
 
     (Open a new tab to run further commands).
 
-1. Now, `nginx:latest` is runnning in your deployment, but it isn't available.
+1. Now, `nginx:latest` is runnning in your deployment, but it isn't accessible.
    Add a kubernetes `Service` configured as a NodePort to make it available on
    port 30001. In `app/constructs/kubernetes-web-app.ts`.
 
-   Add interface for service.
+   Add interface for service:
 
     ```typescript
     export interface KubernetesNodePortServiceConfig {
@@ -408,9 +436,20 @@ Very much a WIP.
     });
     ```
 
+   **FIXME:** Ideas for other things/ways to test?
+
    Check to make sure the test still pass in `npm run test:watch` command. (2 tests passed)
 
-   Add service to `app/main.tf`:
+   Add service to `app/main.tf` imports:
+
+    ```typescript
+    import {
+      KubernetesWebAppDeployment,
+      KubernetesNodePortService,
+    } from './constructs';
+    ```
+
+   And use it right after `KubernetesWebAppDeployment`:
 
     ```typescript
     new KubernetesNodePortService(this, name + "-service",
@@ -441,17 +480,65 @@ Very much a WIP.
       super(scope, name);
 
       this.config = config;
-      this.deployment = new KubernetesWebAppDeployment(this, name + "-deployment",
+      this.deployment = new KubernetesWebAppDeployment(this, `${name}-deployment`,
         {image: config.image, replicas: config.replicas, appName: config.appName, environment: config.environment}
       );
 
-      this.service = new KubernetesNodePortService(this, name + "-service",
+      this.service = new KubernetesNodePortService(this, `${name}-service`,
         {port: config.port, appName: config.appName, environment: config.environment}
       );
     }};
     ```
 
-    Now update `app/main.ts` to use new construct instead of seperate ones.
+1. Add a test for `SimpleKubernetesWebApp`.
+
+   Add import:
+
+    ```typescript
+    import {
+      KubernetesWebAppDeployment,
+      KubernetesNodePortService,
+      SimpleKubernetesWebApp
+    } from "../constructs";
+    ```
+
+   And tests:
+
+    ```typescript
+    describe("SimpleKubernetesWebApp", () => {
+      it("should contain a Service resource", () => {
+        expect(
+          Testing.synthScope((scope) => {
+            new SimpleKubernetesWebApp(scope, "myapp-frontend-dev", {
+              image: "nginx:latest",
+              replicas: "4",
+              appName: "myapp",
+              environment: "dev",
+              port: 30001,
+            });
+          })
+        ).toHaveResource(kubernetes.Service);
+      });
+    });
+
+    describe("SimpleKubernetesWebApp", () => {
+      it("should contain a Deployment resource", () => {
+        expect(
+          Testing.synthScope((scope) => {
+            new SimpleKubernetesWebApp(scope, "myapp-frontend-dev", {
+              image: "nginx:latest",
+              replicas: "4",
+              appName: "myapp",
+              environment: "dev",
+              port: 30001,
+            });
+          })
+        ).toHaveResource(kubernetes.Deployment);
+      });
+    });
+    ```
+
+   Now update `app/main.ts` to use new construct instead of seperate ones.
 
     ```typescript
     import {
@@ -461,10 +548,10 @@ Very much a WIP.
     } from './constructs';
     ```
 
-    And replace the old constructs with the new one:
+   And replace the old constructs with the new one:
 
     ```typescript
-    new SimpleKubernetesWebApp(this, name + "-frontend", {
+    new SimpleKubernetesWebApp(this, `${name}-frontend`, {
       image: "nginx:latest",
       replicas: "2",
       port: 30001,
@@ -473,7 +560,7 @@ Very much a WIP.
     });
     ```
 
-    **Note:** Bug? Unless we `cdktf destroy` first, we get the following error on `cdktf deploy`:
+   **Note:** Bug? Unless we `cdktf destroy` first, we get the following error on `cdktf deploy`:
 
     ```sh
     [2021-10-04T13:08:41.453] [ERROR] default - ╷
@@ -485,33 +572,33 @@ Very much a WIP.
     ⠹ Deploying Stack: app
     ```
 
-    FIXME: This is because it tries to create the new service before destroying the old one. Is this a bug ^^ ?
-
-    Watch: (Maybe start this earlier)
+   **FIXME:** If we don't get a fix for the above, workaround is to update the port to 30002.
+    
+   Watch: (Maybe start this earlier)
  
     ```sh
     cdktf watch --auto-approve
     ```
 
-    Visit `localhost:30001` to see nginx page.
+   Visit `localhost:30001` to see nginx page. (Or :30002)
 
-    Add an output, to `constructs/kubernetes-web-app.ts`.
+   Add an output, to `constructs/kubernetes-web-app.ts`.
 
-    Add near top of file:
+   Add near top of file:
 
     ```typescript
     import { TerraformOutput } from "cdktf";
     ```
 
-    Add inside SimpleKubernetesWebApp's `constructor({...});`:
+   Add inside SimpleKubernetesWebApp's `constructor({...});`:
 
     ```typescript
-    new TerraformOutput(this, "frontend_url", {
-      value: "http://localhost:" + config.port.toString(),
+    new TerraformOutput(this, `${name}-frontend-url`, {
+      value: `http://localhost:${config.port}`,
     });
     ```
 
-    FIXME: I haven't found a way to get cdktf to print the output more than once - the first time the config is deployed. It isn't output at all with `cdktf watch`, afaict. :(
+   **FIXME:** I haven't found a way to get cdktf to print the output more than once - the first time the config is deployed. It isn't output at all with `cdktf watch`, afaict. :(
 
 1. Deploy custom image.
 
@@ -539,19 +626,25 @@ Very much a WIP.
     docker push localhost:5000/nocorp-frontend:latest
     ```
 
-    FIXME: Automate that^^ ?
+   FIXME: Automate that^^ ?
 
    Use image in `app/main.ts`:
 
     ```typescript
-    new SimpleKubernetesWebApp(this, name + "-frontend", {
+    new SimpleKubernetesWebApp(this, `${name}-frontend`, {
       image: "localhost:5000/nocorp-frontend:latest",
-    // image: "nginx:latest",
+      // image: "nginx:latest",
       replicas: "2",
       port: 30001,
       appName: "myapp-frontend",
       environment: "dev"
     });
+    ```
+
+   Back in `app` directory:
+
+    ```sh
+    cd ../app
     ```
 
    Deploy:
@@ -560,10 +653,75 @@ Very much a WIP.
     cdktf deploy
     ```
 
-     (http://localhost:30001 - service might take a few seconds to deploy, but should now be terranomo)
+   (http://localhost:30001 - service might take a few seconds to deploy, but should now be terranomo)
+
+
+1. Build & deploy backend
+
+   Visit `backend` directory:
+
+    ```sh
+    cd ../backend
+    ```
+
+   Build:
+
+    ```sh
+    docker build . -t nocorp-backend
+    ```
+
+   Tag:
+
+    ```sh
+    docker tag nocorp-backend:latest localhost:5000/nocorp-backend:latest
+    ```
+
+   Push (to local registry):
+
+    ```sh
+    docker push localhost:5000/nocorp-backend:latest
+    ```
+
+   And add a new "app":
+
+    ```typescript
+    new SimpleKubernetesWebApp(this, `${name}-backend`, {
+      image: "localhost:5000/nocorp-backend:latest",
+      replicas: "1",
+      port: 30002,
+      appName: "myapp-backend",
+      environment: "dev"
+    });
+    ```
+
+<!-- FIXME: Can't get this to work. :)
+
+  1. Automatically build/detect new images
+
+   Install docker provider:
+
+    ```sh
+    npm install @cdktf/provider-docker
+    ```
+
+  Add to `cdktf.json`:
+
+    ```json
+    "terraformProviders": [
+      "hashicorp/kubernetes@ ~> 2.5.0",
+      "kreuzwerker/docker@ ~> 2.15.0"
+    ],
+    ```
+
+  Run `cdktf get`:
+
+   ```sh
+   cdktf get
+   ```
+ -->
+
 
 1. TODO:
-    1. Lots of cleanup
     1. Deploy frontend/backend that talk to each other
     1. Deploy another "stack"
     1. Deploy app on public cloud
