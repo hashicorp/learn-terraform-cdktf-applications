@@ -166,8 +166,6 @@
     ```sh
     cdktf synth
     ```
-   
-   **FIXME:** `cdktf deploy` always says it's synthesizing. When do we need to run `cdktf synth` first vs just `cdktf deploy`?
 
 1. Deploy
 
