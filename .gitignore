@@ -10,6 +10,8 @@ tsconfig.tsbuildinfo
 !jest.config.js
 !setup.js*.d.ts
 !setup.js
+!backend.js
+!frontend.js
 
 kubeconfig.yaml
 
