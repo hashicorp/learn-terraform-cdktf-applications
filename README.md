@@ -1,5 +1,36 @@
 # Develop applications with CDKTF
 
+1. TODO:
+  1. Make env var passing work (see `app-final/constructs/kubernetes-web-app.ts`)
+  1. Make tests less boring/more realistic
+  1. Review code for style/correctness/best practices
+  1. Notice when new image is deployed, and redeploy app
+    1. Or is this something we could/should just enable in K8S?
+  1. Deploy another "stack" - "test" or somesuch?
+  1. Deploy app on public cloud (for demo/homework, not for all attendees to do)
+
+Questions:
+  - When we install a provider, we either:
+    1. Use NPM to install prebuilt provider:
+       1. `npm install @cdktf/provider-foo`
+       1. `import * as foo from "@cdktf/provider-foo";` (or indiv. classes)
+    1. Generate provider from registry:
+       1. Add to `cdktf.json`: `"owner/foo@ ~> 1.1.0"`
+       1. `cdktf get`
+       1. `import * as foo from "./.gen/providers/foo";`
+  - Is there a cdktf command to print Terraform outputs?
+    - If not, feature request!
+    - Also, why are random letters appended to output names? `frontend_url_FE3D723A`
+  - When importing constructs, any preference between `import * as foo from...`
+    vs `import { FooThing, BarThing } from...`?
+  - Any other features we should demonstrate, or demonstrate differently?
+  - CDKTF seems to "lose track of" resources if you rename them - is this a bug?
+    1. Have resource named "foo".
+    1. Deploy.
+    1. Rename resource to "bar".
+    1. Deploy.
+    1. Now I have two resources?
+
 ## Lab system setup/prerequisites
 
 1. Install & run Docker.
@@ -719,12 +750,4 @@
    cdktf get
    ```
  -->
-
-1. TODO:
-    1. Deploy frontend/backend that talk to each other
-    1. Fix messy naming strategy
-    1. Notice when new image is deployed, and redeploy app
-      1. Or is this something we should just enable in K8S?
-    1. Deploy another "stack"
-    1. Deploy app on public cloud
 

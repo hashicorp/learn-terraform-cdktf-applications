@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import {
   App,
   TerraformStack,
-  TerraformOutput
+  // TerraformOutput
 } from "cdktf";
 
 //import * as kubernetes from "./.gen/providers/kubernetes";
@@ -63,7 +63,8 @@ class MyStack extends TerraformStack {
     //       value: image.sha256Digest
     //     });
 
-    const backend_app = new SimpleKubernetesWebApp(this, `${name}-backend`, {
+    // const backend_app =
+    new SimpleKubernetesWebApp(this, "backend", {
       image: "localhost:5000/nocorp-backend:latest",
       replicas: "1",
       port: 30002,
@@ -71,7 +72,7 @@ class MyStack extends TerraformStack {
       environment: "dev",
     });
 
-    new SimpleKubernetesWebApp(this, `${name}-frontend`, {
+    new SimpleKubernetesWebApp(this, "frontend", {
       image: "localhost:5000/nocorp-frontend:latest",
       replicas: "2",
       port: 30001,
@@ -80,9 +81,9 @@ class MyStack extends TerraformStack {
       // env: { BACKEND_APP_URL: `http://localhost:${backend_app.config.port}` }
     });
 
-    new TerraformOutput(this, "app-backend-url", {
-      value: `http://localhost:${backend_app.config.port}`,
-    });
+    // new TerraformOutput(this, "app-backend-url", {
+    //   value: `http://localhost:${backend_app.config.port}`,
+    // });
 
     // new KubernetesWebAppDeployment(this, `${name}-deployment`,
     //   {image: "nginx:latest", replicas: "2", appName: "myapp", environment: "dev"}
@@ -95,5 +96,5 @@ class MyStack extends TerraformStack {
 }
 
 const app = new App();
-new MyStack(app, "app");
+new MyStack(app, "nocorp-dev");
 app.synth();

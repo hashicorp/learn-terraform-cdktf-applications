@@ -32,7 +32,7 @@ export class SimpleKubernetesWebApp extends Construct {
     this.config = config;
     this.deployment = new KubernetesWebAppDeployment(
       this,
-      `${name}-deployment`,
+      "deployment",
       {
         image: config.image,
         replicas: config.replicas,
@@ -42,13 +42,13 @@ export class SimpleKubernetesWebApp extends Construct {
       }
     );
 
-    this.service = new KubernetesNodePortService(this, `${name}-service`, {
+    this.service = new KubernetesNodePortService(this, "service", {
       port: config.port,
       appName: config.appName,
       environment: config.environment,
     });
 
-    new TerraformOutput(this, `${name}-frontend-url`, {
+    new TerraformOutput(this, "url", {
       value: `http://localhost:${config.port}`,
     });
   }
