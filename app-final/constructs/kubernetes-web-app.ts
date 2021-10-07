@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import * as kubernetes from "../.gen/providers/kubernetes";
+import * as kubernetes from "@cdktf/provider-kubernetes";
 import { TerraformOutput } from "cdktf";
 
 export interface KubernetesWebAppDeploymentConfig {
@@ -101,9 +101,7 @@ export class KubernetesWebAppDeployment extends Construct {
                     {
                       image: config.image,
                       name: config.appName,
-// FIXME: I'm certain this is just my lack of typescript skills. This is close (I think?), but does not work:
-//                      env: Object.entries(config.env).map(([n, v]) => new Object({ name: n, value: v}))
-// Error: Type 'Object[]' is not assignable to type 'DeploymentSpecTemplateSpecContainerEnv[]'.
+                      env: Object.entries(config.env || {}).map(([name, value]) => ({name, value})),
                     },
                   ],
                 },
