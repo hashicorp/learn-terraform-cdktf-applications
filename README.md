@@ -129,6 +129,8 @@
 
 ## Lab scenario
 
+### Step 1: create CDKTF app
+
 1. Install CDKTF libraries, CLI, and constructs (peer dependency)
 
     ```sh
@@ -152,6 +154,8 @@
                --project-description="Learn how to develop CDKTF applications" \
                --local
     ```
+
+### Step 2: Create a Kubernetes Deployment
 
 1. Install kubernetes provider.
 
@@ -252,6 +256,8 @@
     ```sh
     kubectl get pods --kubeconfig ../kubeconfig.yaml
     ```
+
+### Step 3: Refactor Kubernetes Deployment construct
 
 1. Convert the "raw" Deployment to a construct with a nicer interface.
 
@@ -410,6 +416,8 @@
 
     (Open a new tab to run further commands).
 
+### Step 4: Add a NodePortService to make app accessible
+
 1. Now, `nginx:latest` is runnning in your deployment, but it isn't accessible.
    Add a kubernetes `Service` configured as a NodePort to make it available on
    port 30001. In `app/constructs/kubernetes-web-app.ts`.
@@ -518,6 +526,8 @@
 
    Visit `localhost:30001` to see nginx hello world page. Might take a minute or
    two before it's available.
+
+### Step 5: Refactor constructs
 
 1. Refactor constructs into a `SimpleKubernetesWebApp` that includes both components.
 
@@ -653,6 +663,8 @@
 
    **FIXME:** I haven't found a way to get cdktf to print the output more than once - the first time the config is deployed. It isn't output at all with `cdktf watch`, afaict. :(
 
+### Step 6: Deploy custom frontend image
+
 1. Deploy custom image.
 
    Visit `frontend` directory:
@@ -708,6 +720,7 @@
 
    (http://localhost:30001 - service might take a few seconds to deploy, but should now be terranomo)
 
+### Step 7: Add backend service w/custom image
 
 1. Build & deploy backend
 
@@ -772,4 +785,10 @@
    cdktf get
    ```
  -->
+
+### Step 8: Add another stack
+
+### Step 9: Update image and redeploy
+
+### Demo/homework: Deploy stack on AWS EKS
 
