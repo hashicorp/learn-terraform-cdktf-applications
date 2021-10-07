@@ -1,0 +1,19 @@
+{
+  "name": "nocorp-frontend-app",
+  "version": "1.0.0",
+  "description": "NoCorp frontend",
+  "main": "frontend.js",
+  "scripts": {
+    "start": "node frontend.js",
+    "build": "docker build . -t nocorp-frontend",
+    "tag": "docker tag nocorp-frontend:latest localhost:5000/nocorp-frontend:latest",
+    "push": "docker push localhost:5000/nocorp-frontend:latest",
+    "deploy": "npm run build && npm run tag && npm run push"
+  },
+  "author": "Robin Norwood <rnorwood@hashicorp.com>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "pug": "^3.0.2"
+  }
+}

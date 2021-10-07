@@ -1,0 +1,20 @@
+{
+  "name": "nocorp-backend-app",
+  "version": "1.0.0",
+  "description": "NoCorp backend",
+  "main": "backend.js",
+  "scripts": {
+    "start": "node backend.js",
+    "build": "docker build . -t nocorp-backend",
+    "tag": "docker tag nocorp-backend:latest localhost:5000/nocorp-backend:latest",
+    "push": "docker push localhost:5000/nocorp-backend:latest",
+    "deploy": "npm run build && npm run tag && npm run push"
+  },
+  "author": "Robin Norwood <rnorwood@hashicorp.com>",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "shortid": "^2.2.16"
+  }
+}

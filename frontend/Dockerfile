@@ -1,5 +1,16 @@
-FROM nginx
+FROM node:14
 
-COPY nginx.default.conf /etc/nginx/conf.d/default.conf
+WORKDIR /usr/share/app
 
-COPY www/* /usr/share/nginx/html/
+COPY package*.json ./
+COPY frontend.js ./
+COPY public/ ./public/
+COPY views/ ./views/
+
+RUN npm install
+EXPOSE 80
+
+# FIXME: Make env passing work
+ENV BACKEND_URL=http://localhost:30002
+
+CMD ["node", "frontend.js"]

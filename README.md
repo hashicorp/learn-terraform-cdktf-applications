@@ -720,9 +720,11 @@
    ```
  -->
 
-
 1. TODO:
     1. Deploy frontend/backend that talk to each other
+    1. Fix messy naming strategy
+    1. Notice when new image is deployed, and redeploy app
+      1. Or is this something we should just enable in K8S?
     1. Deploy another "stack"
     1. Deploy app on public cloud
 

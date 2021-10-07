@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import {
   App,
   TerraformStack,
-  //  TerraformOutput
+  TerraformOutput
 } from "cdktf";
 
 //import * as kubernetes from "./.gen/providers/kubernetes";
@@ -77,7 +77,11 @@ class MyStack extends TerraformStack {
       port: 30001,
       appName: "myapp-frontend",
       environment: "dev",
-      env: { BACKEND_APP_URL: `http://localhost:${backend_app.config.port}` }
+      // env: { BACKEND_APP_URL: `http://localhost:${backend_app.config.port}` }
+    });
+
+    new TerraformOutput(this, "app-backend-url", {
+      value: `http://localhost:${backend_app.config.port}`,
     });
 
     // new KubernetesWebAppDeployment(this, `${name}-deployment`,
