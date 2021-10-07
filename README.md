@@ -1,35 +1,57 @@
 # Develop applications with CDKTF
 
 1. TODO:
-  1. Make env var passing work (see `app-final/constructs/kubernetes-web-app.ts`)
-  1. Make tests less boring/more realistic
-  1. Review code for style/correctness/best practices
-  1. Notice when new image is deployed, and redeploy app
-    1. Or is this something we could/should just enable in K8S?
-  1. Deploy another "stack" - "test" or somesuch?
-  1. Deploy app on public cloud (for demo/homework, not for all attendees to do)
+   1. Need help with:
+      1. Make env var passing work (see `app-final/constructs/kubernetes-web-app.ts`)
+      1. Make tests less boring/more realistic
+      1. Review code for style/correctness/best practices
+      1. Notice when new image is deployed, and redeploy app
+         1. Or is this something we could/should just enable in K8S?
+      1. Find a better way to handle `cat ../k8s_deployment.tf | cdktf convert` output.
+      1. Find a better way to handle port error
+    1. Just need to do:
+       1. Deploy another "stack" - "test" or somesuch?
+          1. Show how to configure diffferent stacks differently
+       1. Get frontend app to handle lack of backend gracefully:
+          1. "Could not connec to backend!" error
+       1. Deploy app on public cloud (for demo/homework, not for all attendees to do)
+          1. Steal code from: https://github.com/skorfmann/cdktf-container-demo
 
-Questions:
-  - When we install a provider, we either:
-    1. Use NPM to install prebuilt provider:
-       1. `npm install @cdktf/provider-foo`
-       1. `import * as foo from "@cdktf/provider-foo";` (or indiv. classes)
-    1. Generate provider from registry:
-       1. Add to `cdktf.json`: `"owner/foo@ ~> 1.1.0"`
-       1. `cdktf get`
-       1. `import * as foo from "./.gen/providers/foo";`
-  - Is there a cdktf command to print Terraform outputs?
-    - If not, feature request!
-    - Also, why are random letters appended to output names? `frontend_url_FE3D723A`
-  - When importing constructs, any preference between `import * as foo from...`
-    vs `import { FooThing, BarThing } from...`?
-  - Any other features we should demonstrate, or demonstrate differently?
-  - CDKTF seems to "lose track of" resources if you rename them - is this a bug?
-    1. Have resource named "foo".
-    1. Deploy.
-    1. Rename resource to "bar".
-    1. Deploy.
-    1. Now I have two resources?
+1. Questions/Feedback:
+   1. Any other features we should demonstrate, or demonstrate differently?
+   1. To confirm: when we install a provider, we either:
+      1. Use NPM to install prebuilt provider:
+         1. `npm install @cdktf/provider-foo`
+         1. `import * as foo from "@cdktf/provider-foo";` (or indiv. classes)
+         1. Is this the preferred method whenever a prebuild provider is available?
+         1. Any reason you wouldn't want this method? Specific provider version?
+      1. Generate provider from registry:
+         1. Add to `cdktf.json`: `"owner/foo@ ~> 1.1.0"`
+         1. `cdktf get`
+         1. `import * as foo from "./.gen/providers/foo";`
+   1. Is there a cdktf command to print Terraform outputs?
+      1. If not, feature request!
+      1. Also, why are random letters appended to output names? `frontend_url_FE3D723A`
+   1. Is there a cdktf command to print out the resources in my stacks?
+      1. Feature request!
+   1. When importing constructs, any preference between `import * as foo from...`
+      vs `import { FooThing, BarThing } from...`?
+   1. Is there a better way to generate the KubernetesDeployment resource that
+      doesn't require manually tweaking the output?
+   1. In the lab, we first set up a basic NGINX container on port 30001, and then
+      want to change it to our custom image...this causes an error because
+      cdktf/K8S tries to deploy the new Service before deleting the new one, and
+      they're both on port 30001. I think this is just Terraform behavior, not
+      CDKTF necessarily.
+      1. Is there a "CDKTF" way to make this work?
+      1. Should we just run `cdktf destroy` first, or switch the ports when we
+         replace the image to avoid the "bug"?
+   1. CDKTF seems to "lose track of" resources if you rename them - is this a bug?
+      1. Have resource named "foo".
+      1. Deploy.
+      1. Rename resource to "bar".
+      1. Deploy.
+      1. Now I have two resources?
 
 ## Lab system setup/prerequisites
 
