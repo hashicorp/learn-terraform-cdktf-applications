@@ -76,10 +76,10 @@
 
 ## Lab scenario
 
-1. Install CDKTF libraries, CLI, and constructs (peer dependency)
+1. Install CDKTF CLI
 
     ```sh
-    npm install -g cdktf-cli@latest cdktf@latest constructs@^10.0.0
+    npm install -g cdktf-cli@latest
     ```
 
 **Note:** Final version is in `app-final`, or follow these steps:
