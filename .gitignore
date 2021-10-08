@@ -12,6 +12,7 @@ tsconfig.tsbuildinfo
 !setup.js
 !backend.js
 !frontend.js
+!terramino.js
 
 kubeconfig.yaml
 
