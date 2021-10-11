@@ -1,8 +1,9 @@
 resource "kubernetes_deployment" "myapp" {
   metadata {
-    name = "myapp"
+    name = "myapp-frontend-dev"
     labels = {
       app = "myapp"
+      component = "frontend"
       environment = "dev"
     }
   }
@@ -12,33 +13,27 @@ resource "kubernetes_deployment" "myapp" {
 
     selector {
       match_labels = {
-        environment = "dev"
         app = "myapp"
+        component = "frontend"
+        environment = "dev"
       }
     }
 
     template {
       metadata {
         labels = {
-          environment = "dev"
           app = "myapp"
+          component = "frontend"
+          environment = "dev"
         }
       }
 
       spec {
         container {
           image = "nginx:latest"
-          name  = "frontend"
-          
+          name  = "myapp-frontend-dev"
           # ports {
           #   containerPort = 80
-          # }
-
-          # liveness_probe {
-          #   http_get {
-          #     path = "/nginx_status"
-          #     port = 80
-          #   }
           # }
         }
       }
