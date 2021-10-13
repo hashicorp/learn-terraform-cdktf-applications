@@ -275,7 +275,7 @@ function createGame() {
   // Create a new game. This should set gameState.state = "running".
   gameState.state = "starting";
 
-  fetch(`${backendURL}/new`, {mode: 'no-cors'})
+  fetch(`${backendURL}/new`)
     .then((resp) => resp.json())
     .then((data) => { gameState = data.game; tetromino = makeTetromino(data.tetromino) })
     .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
@@ -299,7 +299,7 @@ function makeTetromino(name) {
 }
 
 function loadNextTetromino() {
-  fetch(`${backendURL}/next/${gameState.id}`, {mode: 'no-cors'})
+  fetch(`${backendURL}/next/${gameState.id}`)
     .then((resp) => resp.json())
     .then((data) => tetromino = makeTetromino(data.tetromino) )
     .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
@@ -308,7 +308,7 @@ function loadNextTetromino() {
 function updateScore(points) {
   // Update score by +points.
 
-  fetch(`${backendURL}/score/${gameState.id}?points=${points}`, { mode: 'no-cors', method: 'POST' })
+  fetch(`${backendURL}/score/${gameState.id}?points=${points}`, { method: 'POST' })
     .then((resp) => resp.json())
     .then((data) => gameState = data.game )
     .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
@@ -316,7 +316,7 @@ function updateScore(points) {
 
 function endGame() {
   // End the game.
-  fetch(`${backendURL}/end/${gameState.id}`, { mode: 'no-cors', method: 'POST' })
+  fetch(`${backendURL}/end/${gameState.id}`, { method: 'POST' })
     .then((resp) => resp.json())
     .then((data) => gameState = data.game )
     .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
