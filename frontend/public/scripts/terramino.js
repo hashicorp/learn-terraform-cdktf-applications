@@ -267,6 +267,10 @@ document.addEventListener("keyup", function (e) {
   }
 });
 
+function displayError(e) {
+  document.getElementById("errorMessage").style = "display: flow;";
+};
+
 function createGame() {
   // Create a new game. This should set gameState.state = "running".
   gameState.state = "starting";
@@ -274,7 +278,7 @@ function createGame() {
   fetch(`${backendURL}/new`, {mode: 'no-cors'})
     .then((resp) => resp.json())
     .then((data) => { gameState = data.game; tetromino = makeTetromino(data.tetromino) })
-    .catch((e) => console.log(`Error: ${e}`));
+    .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
 };
 
 function makeTetromino(name) {
@@ -298,7 +302,7 @@ function loadNextTetromino() {
   fetch(`${backendURL}/next/${gameState.id}`, {mode: 'no-cors'})
     .then((resp) => resp.json())
     .then((data) => tetromino = makeTetromino(data.tetromino) )
-    .catch((e) => console.log(`Error: ${e}`));
+    .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
 }
 
 function updateScore(points) {
@@ -307,7 +311,7 @@ function updateScore(points) {
   fetch(`${backendURL}/score/${gameState.id}?points=${points}`, { mode: 'no-cors', method: 'POST' })
     .then((resp) => resp.json())
     .then((data) => gameState = data.game )
-    .catch((e) => console.log(`Error: ${e}`));
+    .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
 };
 
 function endGame() {
@@ -315,7 +319,7 @@ function endGame() {
   fetch(`${backendURL}/end/${gameState.id}`, { mode: 'no-cors', method: 'POST' })
     .then((resp) => resp.json())
     .then((data) => gameState = data.game )
-    .catch((e) => console.log(`Error: ${e}`));
+    .catch((e) => { console.log(`Error: ${e}`); displayError(e)});
 };
 
 function startGameLoop() {

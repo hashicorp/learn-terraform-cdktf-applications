@@ -8,7 +8,8 @@ body
   div.container
     div.content
       h1 Terramino
-      p Move: ← → Rotate: ↑ Drop: ↓
+      p.error(id="errorMessage") Could not connect to server! <br/> Reload to try again.
+      p Move: ← →  Rotate: ↑  Drop: ↓
     div.content
       canvas(width='320', height='640', id='game')
 

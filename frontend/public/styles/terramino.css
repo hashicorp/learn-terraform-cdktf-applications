@@ -39,3 +39,9 @@ canvas {
   font-family: Arial, Helvetica, white, sans-serif;
   font-size: xx-large;
 }
+
+.error {
+  display: none;
+  color: red;
+  font-size: x-large;
+}
