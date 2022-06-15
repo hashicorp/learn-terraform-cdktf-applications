@@ -1,0 +1,25 @@
+{
+  "language": "python",
+  "app": "pipenv run python main.py",
+  "terraformProviders": [
+    {
+      "name": "aws",
+      "source": "hashicorp/aws",
+      "version": "~> 4.10.0"
+    }
+  ],
+  "terraformModules": [
+    {
+      "name": "vpc",
+      "source": "terraform-aws-modules/vpc/aws",
+      "version": "2.77.0"
+    },
+    {
+      "name": "eks",
+      "source": "terraform-aws-modules/eks/aws",
+      "version": "~> 15.0"
+    }
+  ],
+  "codeMakerOutput": "imports",
+  "projectId": "31b8aef2-02c4-459b-a564-44f73b045b32"
+}
