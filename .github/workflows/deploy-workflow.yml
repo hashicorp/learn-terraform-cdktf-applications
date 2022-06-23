@@ -1,0 +1,275 @@
+name: vori-env-deploy
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        required: true
+        type: string
+      environment:
+        required: false
+        type: string
+
+jobs:
+  cloudflare-shared-tf:
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cloudflare AWS Credentials preprod
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: arn:aws:iam::853300446291:role/GithubActionsRole-Role-4COV21EXDTGE
+          aws-region: ca-central-1
+      - name: Configure AWS Credentials prod
+        if: ${{ inputs.stage == 'uat' || inputs.stage == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: arn:aws:iam::183898560091:role/GithubActionsRole-Role-3K30TA7KNBF
+          aws-region: ca-central-1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.11
+      - name: terraform deploy shared resources
+        run: |
+          export BRANCH=${{ inputs.stage }}
+          echo "Checking ./branchMap.sh terraform $BRANCH"
+          VORI_ENV=$(./branchMap.sh terraform)
+          cd infrastructure/cloudflare/env/$VORI_ENV
+          terraform init
+          terraform workspace select shared
+          terraform apply -auto-approve -lock-timeout=5m
+
+  cloudflare-tf:
+    needs:
+      - alexis-lambda
+      - iris-lambda
+      - misha-lambda
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cloudflare AWS Credentials preprod
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: arn:aws:iam::853300446291:role/GithubActionsRole-Role-4COV21EXDTGE
+          aws-region: ca-central-1
+      - name: Configure AWS Credentials prod
+        if: ${{ inputs.stage == 'uat' || inputs.stage == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: arn:aws:iam::183898560091:role/GithubActionsRole-Role-3K30TA7KNBF
+          aws-region: ca-central-1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.11
+      - name: terraform deploy branch
+        run: |
+          export BRANCH=${{ inputs.stage }}
+          echo "Checking ./branchMap.sh terraform $BRANCH"
+          VORI_ENV=$(./branchMap.sh terraform)
+          cd infrastructure/cloudflare/env/$VORI_ENV
+          terraform init
+          terraform workspace select ${{ inputs.stage }}
+          terraform apply --auto-approve
+
+  sql-migrations:
+    needs:
+      - cloudflare-shared-tf
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Deploy lambda for Knex SQL Migrations
+        run: |
+          REGION=$(aws ssm get-parameter --name /${{ inputs.stage }}/ACTIVEREGION  | jq -r '.Parameter.Value')
+          echo "Deploying sql to $REGION"
+          yarn sls deploy \
+            --config serverless-sql.yml \
+            --stage ${{ inputs.stage }} \
+            --region $REGION
+          AWS_REGION="$REGION" yarn run db:migrate-latest-${{ inputs.stage }}
+
+  auth0-config:
+    needs:
+      - cloudflare-shared-tf
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Setup auth0 config
+        run: yarn run deploy:auth0-config-${{ inputs.stage }}
+
+  petya-lambda:
+    needs:
+      - auth0-config
+      - sql-migrations
+      - cloudflare-shared-tf
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Serverless deploy to AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn run deploy:petya-${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn run deploy:petya-${{ inputs.stage }}
+      - name: Execute scheduled lambdas right after deploy
+        run: |
+          if [[ $(AWS_REGION) == "ca-central-1" ]]; then
+          yarn run scheduled:petya-${{ inputs.stage }}
+          fi
+
+  iris-lambda:
+    needs:
+      - auth0-config
+      - sql-migrations
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Serverless create domain on AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn sls create_domain --config serverless-iris.yml --stage ${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn sls create_domain --config serverless-iris.yml --stage ${{ inputs.stage }}
+      - name: Serverless deploy to AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn run deploy:iris-${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn run deploy:iris-${{ inputs.stage }}
+
+  webhook-lambda:
+    needs:
+      - auth0-config
+      - sql-migrations
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Serverless create domain on AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn sls create_domain --config serverless-webhook.yml --stage ${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn sls create_domain --config serverless-webhook.yml --stage ${{ inputs.stage }}
+      - name: Serverless deploy to AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn run deploy:webhook-${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn run deploy:webhook-${{ inputs.stage }}
+
+  misha-lambda:
+    needs:
+      - auth0-config
+      - sql-migrations
+      - petya-lambda
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Serverless create domain on AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn sls create_domain --config serverless-mischa.yml --stage ${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn sls create_domain --config serverless-mischa.yml --stage ${{ inputs.stage }}
+      - name: Serverless deploy to AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn run deploy:mischa-${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn run deploy:mischa-${{ inputs.stage }}
+
+  alexis-lambda:
+    needs:
+      - auth0-config
+      - sql-migrations
+      - petya-lambda
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Serverless create domain on AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn sls create_domain --config serverless-alexis.yml --stage ${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn sls create_domain --config serverless-alexis.yml --stage ${{ inputs.stage }}
+      - name: Serverless deploy to AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn run deploy:alexis-${{ inputs.stage }}
+          AWS_REGION=us-west-2 yarn run deploy:alexis-${{ inputs.stage }}
+
+  publish-gpl-clients:
+    if: ${{ inputs.stage == 'dev' }}
+    needs:
+      - alexis-lambda
+      - misha-lambda
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Publish GPL client for Alexis
+        run: |
+          export NOW=$(date +%s)
+          yarn codegen
+          cd cust/
+          jq --null-input --arg version "0.0.1-$NOW" '{"name": "alexis-gpl-client", "version": $version}' > package.json
+          yarn publish
+          cd ../mischa/
+          jq --null-input --arg version "0.0.1-$NOW" '{"name": "mischa-gpl-client", "version": $version}' > package.json
+          yarn publish
+
+  fusion-userUtils-lambda:
+    if: ${{ inputs.stage == 'fusion' }}
+    needs:
+      - auth0-config
+      - sql-migrations
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+        with:
+          stage: ${{ inputs.stage }}
+      - name: Serverless deploy to AWS
+        run: |
+          AWS_REGION=ca-central-1 yarn run deploy:test-${{ inputs.stage }}

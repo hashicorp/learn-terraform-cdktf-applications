@@ -1,0 +1,43 @@
+name: 'Vori Init Action'
+description: 'Initialize node, yarn, and aws credentials'
+
+inputs:
+  stage:
+    required: true
+    description: stage input
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14.17'
+    - name: Configure AWS Credentials preprod
+      uses: aws-actions/configure-aws-credentials@master
+      with:
+        role-to-assume: arn:aws:iam::853300446291:role/GithubActionsRole-Role-4COV21EXDTGE
+        aws-region: ca-central-1
+    - name: Configure AWS Credentials prod
+      if: ${{ inputs.stage == 'uat' || inputs.stage == 'prod' }}
+      uses: aws-actions/configure-aws-credentials@master
+      with:
+        role-to-assume: arn:aws:iam::183898560091:role/GithubActionsRole-Role-3K30TA7KNBF
+        aws-region: ca-central-1
+    - name: Codeartifact auth
+      shell: bash
+      run: |
+        AUTH=`aws codeartifact get-authorization-token --domain vori --domain-owner 853300446291 --query authorizationToken --output text`
+        echo "registry=https://vori-853300446291.d.codeartifact.ca-central-1.amazonaws.com/npm/vori/" >> ~/.npmrc
+        echo "//vori-853300446291.d.codeartifact.ca-central-1.amazonaws.com/npm/vori/:always-auth=true" >> ~/.npmrc
+        echo "//vori-853300446291.d.codeartifact.ca-central-1.amazonaws.com/npm/vori/:_authToken=${AUTH}" >> ~/.npmrc
+        echo "registry \"https://vori-853300446291.d.codeartifact.ca-central-1.amazonaws.com/npm/vori/\"" >> ~/.yarnrc
+    - name: Cache dependencies
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ./node_modules
+        key: modules-${{ hashFiles('yarn.lock') }}
+    - name: Install dependencies
+      shell: bash
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile

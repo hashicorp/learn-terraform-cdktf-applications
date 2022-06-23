@@ -1,0 +1,296 @@
+name: vori-build
+
+on:
+  push:
+
+jobs:
+  verify-and-unit-test:
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+      - run: docker-compose pull
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+      - name: Functional Tests Docker Compose
+        run: docker-compose up -d --build
+      - name: Functional Test SQL Migrations
+        run: |
+          yarn ts-node tools/localMysqlUp.ts
+          AWS_REGION=ca-central-1 yarn run db:create-local-test-db
+          yarn run db:migrate-latest-test
+      - name: Static checks
+        run: yarn run verify
+      - name: Unit tests
+        run: yarn run test:unit
+      - name: 'Upload Test Results'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: |
+            ./test-results/
+
+  alexis-test:
+    needs: verify-and-unit-test
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+      - run: docker-compose pull
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+      - name: Functional Tests Docker Compose
+        run: docker-compose up -d --build
+      - name: Functional Test SQL Migrations
+        run: |
+          yarn ts-node tools/localMysqlUp.ts
+          AWS_REGION=ca-central-1 yarn run db:create-local-test-db
+          yarn run db:migrate-latest-test
+      - name: Install dynamodb offline
+        run: AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:install
+      - name: Start dynamodb offline
+        run: mkdir artifacts && AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:start > artifacts/dynamodb.log 2>&1 &
+      - name: Serverless Offline Alexis
+        run: AWS_REGION=ca-central-1 yarn run sls-offline:alexis-cache > artifacts/alexis.log 2>&1 &
+      - name: Sleep so sls finishes startup
+        timeout-minutes: 1
+        run: |
+          while ! nc -z -v -w5 localhost 3000; do
+            sleep 2
+          done
+      - name: Alexis Functional Tests
+        run: yarn run test:alexis
+      - name: Shutdown Docker
+        run: docker-compose down
+        if: always()
+      - name: 'Upload Logs'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ./artifacts
+          retention-days: 5
+      - name: 'Upload Test Results'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: |
+            ./cust/test-results/
+
+  core-test:
+    needs: verify-and-unit-test
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+      - run: docker-compose pull
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+      - name: Functional Tests Docker Compose
+        run: docker-compose up -d --build
+      - name: Functional Test SQL Migrations
+        run: |
+          yarn ts-node tools/localMysqlUp.ts
+          AWS_REGION=ca-central-1 yarn run db:create-local-test-db
+          yarn run db:migrate-latest-test
+      - name: Install dynamodb offline
+        run: AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:install
+      - name: Start dynamodb offline
+        run: mkdir artifacts && AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:start > artifacts/dynamodb.log 2>&1 &
+      - name: Core Functional Tests
+        run: yarn run test:core
+      - name: Shutdown Docker
+        run: docker-compose down
+        if: always()
+      - name: 'Upload Logs'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ./artifacts
+          retention-days: 5
+      - name: 'Upload Test Results'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: |
+            ./core-lib/test-results/
+
+  misha-test:
+    needs: verify-and-unit-test
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+      - run: docker-compose pull
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+      - name: Functional Tests Docker Compose
+        run: docker-compose up -d --build
+      - name: Functional Test SQL Migrations
+        run: |
+          yarn ts-node tools/localMysqlUp.ts
+          AWS_REGION=ca-central-1 yarn run db:create-local-test-db
+          yarn run db:migrate-latest-test
+      - name: Install dynamodb offline
+        run: AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:install
+      - name: Start dynamodb offline
+        run: mkdir artifacts && AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:start > artifacts/dynamodb.log 2>&1 &
+      - name: Serverless Offline Misha
+        run: AWS_REGION=ca-central-1 yarn run sls-offline:mischa-cache > artifacts/misha.log 2>&1 &
+      - name: Sleep so sls finishes startup
+        timeout-minutes: 1
+        run: |
+          while ! nc -z -v -w5 localhost 5000; do
+            sleep 2
+          done
+      - name: Misha Functional Tests
+        run: yarn run test:mischa
+      - name: Shutdown Docker
+        run: docker-compose down
+        if: always()
+      - name: 'Upload Logs'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ./artifacts
+          retention-days: 5
+      - name: 'Upload Test Results'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: |
+            ./mischa/test-results/
+
+  webhook-test:
+    needs: verify-and-unit-test
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/init-action
+      - run: docker-compose pull
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+      - name: Functional Tests Docker Compose
+        run: docker-compose up -d --build
+      - name: Functional Test SQL Migrations
+        run: |
+          yarn ts-node tools/localMysqlUp.ts
+          AWS_REGION=ca-central-1 yarn run db:create-local-test-db
+          yarn run db:migrate-latest-test
+      - name: Install dynamodb offline
+        run: AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:install
+      - name: Start dynamodb offline
+        run: mkdir artifacts && AWS_REGION=ca-central-1 yarn run sls-offline:dynamodb:start > artifacts/dynamodb.log 2>&1 &
+      - name: Serverless Offline Webhook
+        run: AWS_REGION=ca-central-1 yarn run sls-offline:webhook-cache > artifacts/webhook.log 2>&1 &
+      - name: Sleep so sls finishes startup
+        timeout-minutes: 1
+        run: |
+          while ! nc -z -v -w5 localhost 5003; do
+            sleep 2
+          done
+      - name: Webhook Functional Tests
+        run: yarn run test:webhook
+      - name: Shutdown Docker
+        run: docker-compose down
+        if: always()
+      - name: 'Upload Logs'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ./artifacts
+          retention-days: 5
+      - name: 'Upload Test Results'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: |
+            ./webhooks/test-results/
+
+  tag-release:
+    needs:
+      - alexis-test
+      - misha-test
+      - webhook-test
+    runs-on: ubuntu-20.04
+    if: contains('refs/heads/main', github.ref)
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Bump version and push tag
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-to-dev:
+    if: contains('refs/heads/main', github.ref)
+    needs:
+      - tag-release
+    uses: Voya-Health/voyaapollolambda/.github/workflows/deploy-workflow.yml@main
+    with:
+      stage: dev
+
+  deploy-to-fusion:
+    if: contains('refs/heads/main', github.ref)
+    needs:
+      - deploy-to-dev
+    uses: Voya-Health/voyaapollolambda/.github/workflows/deploy-workflow.yml@main
+    with:
+      stage: fusion
+      environment: approval-fusion
+
+  deploy-to-qa:
+    if: contains('refs/heads/main', github.ref)
+    needs:
+      - deploy-to-dev
+    uses: Voya-Health/voyaapollolambda/.github/workflows/deploy-workflow.yml@main
+    with:
+      stage: qa
+
+  deploy-to-uat:
+    if: contains('refs/heads/main', github.ref)
+    needs:
+      - deploy-to-qa
+    uses: Voya-Health/voyaapollolambda/.github/workflows/deploy-workflow.yml@main
+    with:
+      stage: uat
+      environment: approval-uat
+
+  deploy-to-prod:
+    if: contains('refs/heads/main', github.ref)
+    needs:
+      - deploy-to-uat
+    uses: Voya-Health/voyaapollolambda/.github/workflows/deploy-workflow.yml@main
+    with:
+      stage: prod
+      environment: approval-prod
