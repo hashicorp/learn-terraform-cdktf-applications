@@ -8,10 +8,4 @@ cdktf.log
 .terraform
 tsconfig.tsbuildinfo
 !jest.config.js
-!setup.js*.d.ts
 !setup.js
-!backend.js
-!frontend.js
-!terramino.js
-
-kubeconfig.yaml
