@@ -20,19 +20,13 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		ConfigPath: jsii.String(path.Join(cwd, "../kubeconfig.yaml")),
 	})
 
-	myconstructs.NewKubernetesWebAppDeployment(stack, jsii.String("deployment"), &myconstructs.KubernetesWebAppDeploymentConfig{
+	myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("webapp"), &myconstructs.SimpleKubernetesWebAppConfig{
 		Image:       jsii.String("nginx:latest"),
-		Replicas:    2,
+		Replicas:    3,
 		App:         jsii.String("myapp"),
 		Component:   jsii.String("frontend"),
 		Environment: jsii.String("dev"),
-	})
-
-	myconstructs.NewKubernetesNodePortService(stack, jsii.String("service"), &myconstructs.KubernetesNodePortServiceConfig{
 		Port:        30001,
-		App:         jsii.String("myapp"),
-		Component:   jsii.String("frontend"),
-		Environment: jsii.String("dev"),
 	})
 
 	return stack
