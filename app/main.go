@@ -28,6 +28,13 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		Environment: jsii.String("dev"),
 	})
 
+	myconstructs.NewKubernetesNodePortService(stack, jsii.String("service"), &myconstructs.KubernetesNodePortServiceConfig{
+		Port:        30001,
+		App:         jsii.String("myapp"),
+		Component:   jsii.String("frontend"),
+		Environment: jsii.String("dev"),
+	})
+
 	return stack
 }
 

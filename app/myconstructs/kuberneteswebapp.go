@@ -7,7 +7,11 @@ import (
 	"github.com/aws/jsii-runtime-go"
 	"github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/deployment"
 	"github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/service"
+	"github.com/hashicorp/terraform-cdk-go/cdktf"
 )
+
+type KubernetesWebAppDeployment struct {
+}
 
 type KubernetesWebAppDeploymentConfig struct {
 	Image       *string
@@ -18,7 +22,7 @@ type KubernetesWebAppDeploymentConfig struct {
 	Env         *map[string]*string
 }
 
-func NewKubernetesWebAppDeployment(scope constructs.Construct, name *string, config *KubernetesWebAppDeploymentConfig) constructs.Construct {
+func NewKubernetesWebAppDeployment(scope constructs.Construct, name *string, config *KubernetesWebAppDeploymentConfig) KubernetesWebAppDeployment {
 	c := constructs.NewConstruct(scope, name)
 
 	labels := &map[string]*string{
@@ -64,7 +68,9 @@ func NewKubernetesWebAppDeployment(scope constructs.Construct, name *string, con
 		},
 	})
 
-	return c
+	kwad := KubernetesWebAppDeployment{}
+
+	return kwad
 }
 
 type KubernetesNodePortServiceConfig struct {
@@ -75,7 +81,7 @@ type KubernetesNodePortServiceConfig struct {
 }
 
 type KubernetesNodePortService struct {
-	resource service.Service
+	resource *service.Service
 }
 
 func NewKubernetesNodePortService(scope constructs.Construct, name *string, config *KubernetesNodePortServiceConfig) KubernetesNodePortService {
@@ -99,8 +105,55 @@ func NewKubernetesNodePortService(scope constructs.Construct, name *string, conf
 	})
 
 	knps := KubernetesNodePortService{
-		resource: service,
+		resource: &service,
 	}
 
 	return knps
+}
+
+type SimpleKubernetesWebApp struct {
+	deployment *KubernetesWebAppDeployment
+	service    *KubernetesNodePortService
+	config     *SimpleKubernetesWebAppConfig
+}
+
+type SimpleKubernetesWebAppConfig struct {
+	Port        int
+	Image       *string
+	Replicas    int
+	App         *string
+	Component   *string
+	Environment *string
+	Env         *map[string]*string
+}
+
+func NewSimpleKubernetesWebApp(scope constructs.Construct, name *string, config *SimpleKubernetesWebAppConfig) SimpleKubernetesWebApp {
+	c := constructs.NewConstruct(scope, name)
+
+	deployment := NewKubernetesWebAppDeployment(c, jsii.String("deployment"), &KubernetesWebAppDeploymentConfig{
+		Image:       config.Image,
+		Replicas:    config.Replicas,
+		App:         config.App,
+		Component:   config.Component,
+		Environment: config.Environment,
+	})
+
+	service := NewKubernetesNodePortService(c, jsii.String("service"), &KubernetesNodePortServiceConfig{
+		Port:        30001,
+		App:         config.App,
+		Component:   config.Component,
+		Environment: config.Environment,
+	})
+
+	skwa := SimpleKubernetesWebApp{
+		config:     config,
+		deployment: &deployment,
+		service:    &service,
+	}
+
+	cdktf.NewTerraformOutput(c, jsii.String("url"), &cdktf.TerraformOutputConfig{
+		Value: jsii.String(fmt.Sprintf("http://localhost:%d", config.Port)),
+	})
+
+	return skwa
 }

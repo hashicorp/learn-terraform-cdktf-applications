@@ -38,9 +38,30 @@ func NewTestStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 	return stack
 }
 
+func NewSimpleKubernetesWebAppTestStack(scope constructs.Construct, id string) cdktf.TerraformStack {
+	stack := cdktf.NewTerraformStack(scope, &id)
+
+	kubernetesprovider.NewKubernetesProvider(stack, jsii.String("kubernetes"), nil)
+
+	myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("webapp"), &myconstructs.SimpleKubernetesWebAppConfig{
+		Image:       jsii.String("nginx:latest"),
+		Replicas:    4,
+		App:         jsii.String("myapp"),
+		Component:   jsii.String("frontend"),
+		Environment: jsii.String("dev"),
+		Port:        30001,
+	})
+
+	return stack
+}
+
 var run_validations = true
 var synth = cdktf.Testing_Synth(
 	NewTestStack(cdktf.Testing_App(nil), *jsii.String("testing")),
+	&run_validations,
+)
+var synthSimpleWebApp = cdktf.Testing_Synth(
+	NewSimpleKubernetesWebAppTestStack(cdktf.Testing_App(nil), *jsii.String("testing")),
 	&run_validations,
 )
 
@@ -54,6 +75,22 @@ func TestShouldContainDeployment(t *testing.T) {
 
 func TestShouldContainService(t *testing.T) {
 	assertion := cdktf.Testing_ToHaveResource(synth, deployment.Deployment_TfResourceType())
+
+	if !*assertion {
+		t.Error("Expected kubernetes Service construct but found none")
+	}
+}
+
+func TestSimpleWebAppShouldContainDeployment(t *testing.T) {
+	assertion := cdktf.Testing_ToHaveResource(synthSimpleWebApp, deployment.Deployment_TfResourceType())
+
+	if !*assertion {
+		t.Error("Expected kubernetes Deployment construct but found none")
+	}
+}
+
+func TestSimpleWebAppShouldContainService(t *testing.T) {
+	assertion := cdktf.Testing_ToHaveResource(synthSimpleWebApp, deployment.Deployment_TfResourceType())
 
 	if !*assertion {
 		t.Error("Expected kubernetes Service construct but found none")
