@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -20,6 +21,15 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		ConfigPath: jsii.String(path.Join(cwd, "../kubeconfig.yaml")),
 	})
 
+	backend := myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("app_backend"), &myconstructs.SimpleKubernetesWebAppConfig{
+		Image:       jsii.String("localhost:5000/nocorp-backend:latest"),
+		Replicas:    1,
+		Port:        30002,
+		App:         jsii.String("myapp"),
+		Component:   jsii.String("backend"),
+		Environment: jsii.String("dev"),
+	})
+
 	myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("app_frontend"), &myconstructs.SimpleKubernetesWebAppConfig{
 		Image:       jsii.String("localhost:5000/nocorp-frontend:latest"),
 		Replicas:    3,
@@ -27,15 +37,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		Component:   jsii.String("frontend"),
 		Environment: jsii.String("dev"),
 		Port:        30001,
-	})
-
-	myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("app_backend"), &myconstructs.SimpleKubernetesWebAppConfig{
-		Image:       jsii.String("localhost:5000/nocorp-backend:latest"),
-		Replicas:    1,
-		Port:        30002,
-		App:         jsii.String("myapp"),
-		Component:   jsii.String("backend"),
-		Environment: jsii.String("dev"),
+		Env:         &map[string]*string{"BACKEND_APP_URL": jsii.String(fmt.Sprintf("http://localhost:%d", backend.Config.Port))},
 	})
 
 	return stack

@@ -112,9 +112,9 @@ func NewKubernetesNodePortService(scope constructs.Construct, name *string, conf
 }
 
 type SimpleKubernetesWebApp struct {
-	deployment *KubernetesWebAppDeployment
-	service    *KubernetesNodePortService
-	config     *SimpleKubernetesWebAppConfig
+	Deployment *KubernetesWebAppDeployment
+	Service    *KubernetesNodePortService
+	Config     *SimpleKubernetesWebAppConfig
 }
 
 type SimpleKubernetesWebAppConfig struct {
