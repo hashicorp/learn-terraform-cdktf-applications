@@ -4,9 +4,9 @@ import (
 	"os"
 	"path"
 
+	"cdk.tf/go/stack/myconstructs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
-	"github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/deployment"
 	kubernetesprovider "github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/provider"
 	"github.com/hashicorp/terraform-cdk-go/cdktf"
 )
@@ -20,36 +20,12 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		ConfigPath: jsii.String(path.Join(cwd, "../kubeconfig.yaml")),
 	})
 
-	labels := &map[string]*string{
-		"app":         jsii.String("myapp"),
-		"component":   jsii.String("frontend"),
-		"environment": jsii.String("dev"),
-	}
-
-	deployment.NewDeployment(stack, jsii.String("myapp"), &deployment.DeploymentConfig{
-		Metadata: &deployment.DeploymentMetadata{
-			Labels: labels,
-			Name:   jsii.String("myapp"),
-		},
-		Spec: &deployment.DeploymentSpec{
-			Replicas: jsii.String("4"),
-			Selector: &deployment.DeploymentSpecSelector{
-				MatchLabels: labels,
-			},
-			Template: &deployment.DeploymentSpecTemplate{
-				Metadata: &deployment.DeploymentSpecTemplateMetadata{
-					Labels: labels,
-				},
-				Spec: &deployment.DeploymentSpecTemplateSpec{
-					Container: &[]map[string]*string{
-						{
-							"image": jsii.String("nginx:latest"),
-							"name":  jsii.String("frontend"),
-						},
-					},
-				},
-			},
-		},
+	myconstructs.NewKubernetesWebAppDeployment(stack, jsii.String("deployment"), &myconstructs.KubernetesWebAppDeploymentConfig{
+		Image:       jsii.String("nginx:latest"),
+		Replicas:    2,
+		App:         jsii.String("myapp"),
+		Component:   jsii.String("frontend"),
+		Environment: jsii.String("dev"),
 	})
 
 	return stack
