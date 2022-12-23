@@ -15,5 +15,3 @@ tsconfig.tsbuildinfo
 !terramino.js
 
 kubeconfig.yaml
-
-app/
