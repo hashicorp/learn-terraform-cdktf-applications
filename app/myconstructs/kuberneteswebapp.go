@@ -6,6 +6,7 @@ import (
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/deployment"
+	"github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/service"
 )
 
 type KubernetesWebAppDeploymentConfig struct {
@@ -64,4 +65,42 @@ func NewKubernetesWebAppDeployment(scope constructs.Construct, name *string, con
 	})
 
 	return c
+}
+
+type KubernetesNodePortServiceConfig struct {
+	Port        int
+	App         *string
+	Component   *string
+	Environment *string
+}
+
+type KubernetesNodePortService struct {
+	resource service.Service
+}
+
+func NewKubernetesNodePortService(scope constructs.Construct, name *string, config *KubernetesNodePortServiceConfig) KubernetesNodePortService {
+	c := constructs.NewConstruct(scope, name)
+
+	service := service.NewService(c, name, &service.ServiceConfig{
+		Metadata: &service.ServiceMetadata{
+			Name: jsii.String(fmt.Sprintf("%s-%s-%s", *config.App, *config.Component, *config.Environment)),
+		},
+		Spec: &service.ServiceSpec{
+			Type: jsii.String("NodePort"),
+			Port: &[]map[string]interface{}{
+				{
+					"port":       80,
+					"targetPort": jsii.String("80"),
+					"nodePort":   config.Port,
+					"protocol":   jsii.String("TCP"),
+				},
+			},
+		},
+	})
+
+	knps := KubernetesNodePortService{
+		resource: service,
+	}
+
+	return knps
 }

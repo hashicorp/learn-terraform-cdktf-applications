@@ -28,6 +28,13 @@ func NewTestStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		Environment: jsii.String("dev"),
 	})
 
+	myconstructs.NewKubernetesNodePortService(stack, jsii.String("service"), &myconstructs.KubernetesNodePortServiceConfig{
+		App:         jsii.String("myapp"),
+		Component:   jsii.String("frontend"),
+		Environment: jsii.String("dev"),
+		Port:        30001,
+	})
+
 	return stack
 }
 
@@ -37,10 +44,18 @@ var synth = cdktf.Testing_Synth(
 	&run_validations,
 )
 
-func TestShouldContainContainer(t *testing.T) {
+func TestShouldContainDeployment(t *testing.T) {
 	assertion := cdktf.Testing_ToHaveResource(synth, deployment.Deployment_TfResourceType())
 
 	if !*assertion {
 		t.Error("Expected kubernetes Deployment construct but found none")
+	}
+}
+
+func TestShouldContainService(t *testing.T) {
+	assertion := cdktf.Testing_ToHaveResource(synth, deployment.Deployment_TfResourceType())
+
+	if !*assertion {
+		t.Error("Expected kubernetes Service construct but found none")
 	}
 }
