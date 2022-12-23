@@ -32,7 +32,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 			Name:   jsii.String("myapp"),
 		},
 		Spec: &deployment.DeploymentSpec{
-			Replicas: jsii.String("1"),
+			Replicas: jsii.String("4"),
 			Selector: &deployment.DeploymentSpecSelector{
 				MatchLabels: labels,
 			},
