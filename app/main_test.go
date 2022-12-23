@@ -2,41 +2,45 @@ package main
 
 import (
 	"testing"
-	"github.com/hashicorp/terraform-cdk-go/cdktf"
+
+	"cdk.tf/go/stack/myconstructs"
+	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/deployment"
+	kubernetesprovider "github.com/cdktf/cdktf-provider-kubernetes-go/kubernetes/v4/provider"
+
+	"github.com/hashicorp/terraform-cdk-go/cdktf"
 )
 
 // The tests below are example tests, you can find more information at
 // https://cdk.tf/testing
 
-/*
-var stack = NewMyApplicationsAbstraction(cdktf.Assertions_App(nil), "stack")
-var synth = cdktf.Assertions_Synth(stack)
+func NewTestStack(scope constructs.Construct, id string) cdktf.TerraformStack {
+	stack := cdktf.NewTerraformStack(scope, &id)
 
-func TestShouldContainContainer(t *testing.T){
-	assertion := cdktf.Assertions_ToHaveResource(synth, docker.Container_TfResourceType())
+	kubernetesprovider.NewKubernetesProvider(stack, jsii.String("kubernetes"), nil)
 
-	if !*assertion  {
-		t.Error(assertion.Message())
-	}
+	myconstructs.NewKubernetesWebAppDeployment(stack, jsii.String("webapp"), &myconstructs.KubernetesWebAppDeploymentConfig{
+		Image:       jsii.String("nginx:latest"),
+		Replicas:    4,
+		App:         jsii.String("myapp"),
+		Component:   jsii.String("frontend"),
+		Environment: jsii.String("dev"),
+	})
+
+	return stack
 }
 
-func TestShouldUseUbuntuImage(t *testing.T){
-	properties := map[string]interface{}{
-		"name": "ubuntu:latest",
-	}
-	assertion := cdktf.Assertions_ToHaveResourceWithProperties(synth, docker.Image_TfResourceType(), &properties)
+var run_validations = true
+var synth = cdktf.Testing_Synth(
+	NewTestStack(cdktf.Testing_App(nil), *jsii.String("testing")),
+	&run_validations,
+)
 
-	if !*assertion  {
-		t.Error(assertion.Message())
-	}
-}
+func TestShouldContainContainer(t *testing.T) {
+	assertion := cdktf.Testing_ToHaveResource(synth, deployment.Deployment_TfResourceType())
 
-func TestCheckValidity(t *testing.T){
-	assertion := cdktf.Testing_ToBeValidTerraform(cdktf.Testing_FullSynth(stack))
-
-	if !*assertion  {
-		t.Error(assertion.Message())
+	if !*assertion {
+		t.Error("Expected kubernetes Deployment construct but found none")
 	}
 }
-*/
