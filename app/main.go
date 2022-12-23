@@ -20,31 +20,25 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		ConfigPath: jsii.String(path.Join(cwd, "../kubeconfig.yaml")),
 	})
 
+	labels := &map[string]*string{
+		"app":         jsii.String("myapp"),
+		"component":   jsii.String("frontend"),
+		"environment": jsii.String("dev"),
+	}
+
 	deployment.NewDeployment(stack, jsii.String("myapp"), &deployment.DeploymentConfig{
 		Metadata: &deployment.DeploymentMetadata{
-			Labels: &map[string]*string{
-				"app":         jsii.String("myapp"),
-				"component":   jsii.String("frontend"),
-				"environment": jsii.String("dev"),
-			},
-			Name: jsii.String("myapp"),
+			Labels: labels,
+			Name:   jsii.String("myapp"),
 		},
 		Spec: &deployment.DeploymentSpec{
 			Replicas: jsii.String("1"),
 			Selector: &deployment.DeploymentSpecSelector{
-				MatchLabels: &map[string]*string{
-					"app":         jsii.String("myapp"),
-					"component":   jsii.String("frontend"),
-					"environment": jsii.String("dev"),
-				},
+				MatchLabels: labels,
 			},
 			Template: &deployment.DeploymentSpecTemplate{
 				Metadata: &deployment.DeploymentSpecTemplateMetadata{
-					Labels: &map[string]*string{
-						"app":         jsii.String("myapp"),
-						"component":   jsii.String("frontend"),
-						"environment": jsii.String("dev"),
-					},
+					Labels: labels,
 				},
 				Spec: &deployment.DeploymentSpecTemplateSpec{
 					Container: &[]map[string]*string{
