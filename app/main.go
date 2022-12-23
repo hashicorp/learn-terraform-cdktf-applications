@@ -21,7 +21,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 	})
 
 	myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("webapp"), &myconstructs.SimpleKubernetesWebAppConfig{
-		Image:       jsii.String("nginx:latest"),
+		Image:       jsii.String("localhost:5000/nocorp-frontend:latest"),
 		Replicas:    3,
 		App:         jsii.String("myapp"),
 		Component:   jsii.String("frontend"),
