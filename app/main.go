@@ -56,5 +56,24 @@ func main() {
 		},
 	})
 
+	NewMyStack(app, "app-test", MyStackConfig{
+		Backend: &myconstructs.SimpleKubernetesWebAppConfig{
+			Image:       jsii.String("localhost:5000/nocorp-backend:latest"),
+			Replicas:    2,
+			Port:        30004,
+			App:         jsii.String("myapp"),
+			Component:   jsii.String("backend"),
+			Environment: jsii.String("test"),
+		},
+		Frontend: &myconstructs.SimpleKubernetesWebAppConfig{
+			Image:       jsii.String("localhost:5000/nocorp-frontend:latest"),
+			Replicas:    4,
+			App:         jsii.String("myapp"),
+			Component:   jsii.String("frontend"),
+			Environment: jsii.String("test"),
+			Port:        30003,
+		},
+	})
+
 	app.Synth()
 }
