@@ -146,9 +146,9 @@ func NewSimpleKubernetesWebApp(scope constructs.Construct, name *string, config 
 	})
 
 	skwa := SimpleKubernetesWebApp{
-		config:     config,
-		deployment: &deployment,
-		service:    &service,
+		Config:     config,
+		Deployment: &deployment,
+		Service:    &service,
 	}
 
 	cdktf.NewTerraformOutput(c, jsii.String("url"), &cdktf.TerraformOutputConfig{
