@@ -2,6 +2,7 @@ package com.mycompany.app;
 
 import software.constructs.Construct;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -15,28 +16,34 @@ public class MainStack extends TerraformStack {
         super(scope, id);
 
         new KubernetesProvider(this, "provider", KubernetesProviderConfig.builder()
-                .configPath("../../kubeconfig.yaml")
+                .configPath(new File("../../kubeconfig.yaml").getAbsolutePath())
                 .build());
 
         new Deployment(this, "deployment", DeploymentConfig.builder()
                 .metadata(DeploymentMetadata.builder()
-                        .labels(Map.of("app", "myapp", "component", "frontend", "environment", "dev"))
+                        .labels(Map.of("app", "myapp", "component", "frontend", "environment",
+                                "dev"))
                         .name("myapp")
                         .build())
                 .spec(DeploymentSpec.builder()
                         .replicas("1")
                         .selector(DeploymentSpecSelector.builder()
-                                .matchLabels(Map.of("app", "myapp", "component", "frontend", "environment", "dev"))
+                                .matchLabels(Map.of("app", "myapp", "component",
+                                        "frontend", "environment", "dev"))
                                 .build())
                         .template(DeploymentSpecTemplate.builder()
                                 .metadata(DeploymentSpecTemplateMetadata.builder()
-                                        .labels(Map.of("app", "myapp", "component", "frontend", "environment", "dev"))
+                                        .labels(Map.of("app", "myapp",
+                                                "component", "frontend",
+                                                "environment", "dev"))
                                         .build())
                                 .spec(DeploymentSpecTemplateSpec.builder()
-                                        .container(List.of(DeploymentSpecTemplateSpecContainer.builder()
-                                                .image("nginx:latest")
-                                                .name("frontend")
-                                                .build()))
+                                        .container(List.of(
+                                                DeploymentSpecTemplateSpecContainer
+                                                        .builder()
+                                                        .image("nginx:latest")
+                                                        .name("frontend")
+                                                        .build()))
                                         .build())
                                 .build())
                         .build())
