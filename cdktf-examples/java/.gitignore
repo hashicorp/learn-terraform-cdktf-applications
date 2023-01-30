@@ -10,3 +10,5 @@ cdktf.log
 .vscode
 *.iml
 target/
+
+!app
