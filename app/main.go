@@ -12,7 +12,12 @@ import (
 	"github.com/hashicorp/terraform-cdk-go/cdktf"
 )
 
-func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
+type MyStackConfig struct {
+	Frontend *myconstructs.SimpleKubernetesWebAppConfig
+	Backend  *myconstructs.SimpleKubernetesWebAppConfig
+}
+
+func NewMyStack(scope constructs.Construct, id string, config MyStackConfig) cdktf.TerraformStack {
 	stack := cdktf.NewTerraformStack(scope, &id)
 
 	cwd, _ := os.Getwd()
@@ -21,24 +26,10 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		ConfigPath: jsii.String(path.Join(cwd, "../kubeconfig.yaml")),
 	})
 
-	backend := myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("app_backend"), &myconstructs.SimpleKubernetesWebAppConfig{
-		Image:       jsii.String("localhost:5000/nocorp-backend:latest"),
-		Replicas:    1,
-		Port:        30002,
-		App:         jsii.String("myapp"),
-		Component:   jsii.String("backend"),
-		Environment: jsii.String("dev"),
-	})
+	backend := myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("app_backend"), config.Backend)
 
-	myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("app_frontend"), &myconstructs.SimpleKubernetesWebAppConfig{
-		Image:       jsii.String("localhost:5000/nocorp-frontend:latest"),
-		Replicas:    3,
-		App:         jsii.String("myapp"),
-		Component:   jsii.String("frontend"),
-		Environment: jsii.String("dev"),
-		Port:        30001,
-		Env:         &map[string]*string{"BACKEND_APP_URL": jsii.String(fmt.Sprintf("http://localhost:%d", backend.Config.Port))},
-	})
+	config.Frontend.Env = &map[string]*string{"BACKEND_APP_URL": jsii.String(fmt.Sprintf("http://localhost:%d", backend.Config.Port))}
+	myconstructs.NewSimpleKubernetesWebApp(stack, jsii.String("app_frontend"), config.Frontend)
 
 	return stack
 }
@@ -46,7 +37,24 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 func main() {
 	app := cdktf.NewApp(nil)
 
-	NewMyStack(app, "app")
+	NewMyStack(app, "app", MyStackConfig{
+		Backend: &myconstructs.SimpleKubernetesWebAppConfig{
+			Image:       jsii.String("localhost:5000/nocorp-backend:latest"),
+			Replicas:    1,
+			Port:        30002,
+			App:         jsii.String("myapp"),
+			Component:   jsii.String("backend"),
+			Environment: jsii.String("dev"),
+		},
+		Frontend: &myconstructs.SimpleKubernetesWebAppConfig{
+			Image:       jsii.String("localhost:5000/nocorp-frontend:latest"),
+			Replicas:    3,
+			App:         jsii.String("myapp"),
+			Component:   jsii.String("frontend"),
+			Environment: jsii.String("dev"),
+			Port:        30001,
+		},
+	})
 
 	app.Synth()
 }
