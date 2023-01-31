@@ -36,3 +36,11 @@ Found pre-built provider.
 Adding com.hashicorp.cdktf-provider-kubernetes @ 5.0.1 to pom.xml
 Package installed.
 ```
+
+```diff
+               .spec(DeploymentSpec.builder()
+-                        .replicas("1")
++                        .replicas("4")
+                         .selector(DeploymentSpecSelector.builder()
+
+```
