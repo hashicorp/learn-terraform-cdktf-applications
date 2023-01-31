@@ -1,14 +1,14 @@
 package com.company.constructs;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 
 import com.hashicorp.cdktf.TerraformStack;
 import com.hashicorp.cdktf.Testing;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.Deployment;
 import com.mycompany.constructs.KubernetesWebAppDeployment;
 import com.mycompany.constructs.KubernetesWebAppDeploymentConfig;
-import com.hashicorp.cdktf.providers.kubernetes.deployment.*;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class KubernetesWebAppDeploymentTest {
 

@@ -3,10 +3,13 @@ package com.mycompany.app;
 import java.io.File;
 import java.util.Map;
 
-import com.mycompany.constructs.*;
-import software.constructs.Construct;
 import com.hashicorp.cdktf.TerraformStack;
-import com.hashicorp.cdktf.providers.kubernetes.provider.*;
+import com.hashicorp.cdktf.providers.kubernetes.provider.KubernetesProvider;
+import com.hashicorp.cdktf.providers.kubernetes.provider.KubernetesProviderConfig;
+import com.mycompany.constructs.SimpleKubernetesWebApp;
+import com.mycompany.constructs.SimpleKubernetesWebAppConfig;
+
+import software.constructs.Construct;
 
 public class MainStack extends TerraformStack {
         public MainStack(final Construct scope, final String id) {

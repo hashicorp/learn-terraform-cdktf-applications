@@ -3,12 +3,11 @@ package com.company.constructs;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+
 import com.hashicorp.cdktf.TerraformStack;
 import com.hashicorp.cdktf.Testing;
 import com.hashicorp.cdktf.providers.kubernetes.deployment.Deployment;
 import com.hashicorp.cdktf.providers.kubernetes.service.Service;
-import com.mycompany.constructs.KubernetesNodePortServiceConfig;
-import com.mycompany.constructs.KubernetesWebAppDeploymentConfig;
 import com.mycompany.constructs.SimpleKubernetesWebApp;
 import com.mycompany.constructs.SimpleKubernetesWebAppConfig;
 

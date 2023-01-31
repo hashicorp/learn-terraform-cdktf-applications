@@ -2,10 +2,20 @@ package com.mycompany.constructs;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import com.hashicorp.cdktf.providers.kubernetes.deployment.*;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.Deployment;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentConfig;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentMetadata;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentSpec;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentSpecSelector;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentSpecTemplate;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentSpecTemplateMetadata;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentSpecTemplateSpec;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentSpecTemplateSpecContainer;
+import com.hashicorp.cdktf.providers.kubernetes.deployment.DeploymentSpecTemplateSpecContainerEnv;
+
 import software.constructs.Construct;
 
 public class KubernetesWebAppDeployment extends Construct {
