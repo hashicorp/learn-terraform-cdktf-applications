@@ -20,5 +20,11 @@ public class MainStack extends TerraformStack {
                 .setApp("myapp")
                 .setComponent("frontend")
                 .setEnvironment("dev"));
+
+        new KubernetesNodePortService(this, "service", new KubernetesNodePortServiceConfig()
+                .setPort(30001)
+                .setApp("myapp")
+                .setComponent("frontend")
+                .setEnvironment("dev"));
     }
 }

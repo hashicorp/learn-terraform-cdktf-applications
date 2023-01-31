@@ -141,3 +141,32 @@ $ mvn test
 [INFO] Finished at: 2023-01-31T16:54:47+01:00
 [INFO] ------------------------------------------------------------------------
 ```
+
+```shell
+$ cdktf deploy
+
+⠋  Starting
+[2023-01-31T16:57:34.533] [WARN] default - WARNING: Found NODE_OPTIONS environment variable without a setting for --max-old-space-size
+The synthesizing step for TypeScript may need an increased amount of memory if multiple large providers
+are used with locally generated bindings. You can ignore this if you don't use CDKTF with TypeScript.
+If not present, the cdktf-cli sets it to NODE_OPTIONS="--max-old-space-size=4096" by default. But as
+app  Initializing the backend...
+app  Initializing provider plugins...
+     - Reusing previous version of hashicorp/kubernetes from the dependency lock file
+app  - Using previously-installed hashicorp/kubernetes v2.17.0
+     Plan: 1 to add, 0 to change, 0 to destroy.
+
+     Do you want to perform these actions?
+       Terraform will perform the actions described above.
+       Only 'yes' will be accepted to approve.
+
+       Enter a value:
+app  yes
+app  kubernetes_service.service_E7C408F2 (service/service): Creating...
+app  kubernetes_service.service_E7C408F2 (service/service): Creation complete after 0s [id=default/myapp-frontend-dev]
+app
+     Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+
+
+No outputs found.
+```
