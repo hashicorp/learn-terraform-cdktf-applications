@@ -11,8 +11,8 @@ import com.mycompany.constructs.SimpleKubernetesWebAppConfig;
 
 import software.constructs.Construct;
 
-public class MainStack extends TerraformStack {
-        public MainStack(final Construct scope, final String id) {
+public class MyStack extends TerraformStack {
+        public MyStack(final Construct scope, final String id) {
                 super(scope, id);
 
                 new KubernetesProvider(this, "provider", KubernetesProviderConfig.builder()
