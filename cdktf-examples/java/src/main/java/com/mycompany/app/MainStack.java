@@ -7,24 +7,20 @@ import com.hashicorp.cdktf.TerraformStack;
 import com.hashicorp.cdktf.providers.kubernetes.provider.*;
 
 public class MainStack extends TerraformStack {
-    public MainStack(final Construct scope, final String id) {
-        super(scope, id);
+        public MainStack(final Construct scope, final String id) {
+                super(scope, id);
 
-        new KubernetesProvider(this, "provider", KubernetesProviderConfig.builder()
-                .configPath(new File("../../kubeconfig.yaml").getAbsolutePath())
-                .build());
+                new KubernetesProvider(this, "provider", KubernetesProviderConfig.builder()
+                                .configPath(new File("../../kubeconfig.yaml").getAbsolutePath())
+                                .build());
 
-        new KubernetesWebAppDeployment(this, "deployment", new KubernetesWebAppDeploymentConfig()
-                .setImage("nginx:latest")
-                .setReplicas(2)
-                .setApp("myapp")
-                .setComponent("frontend")
-                .setEnvironment("dev"));
+                new SimpleKubernetesWebApp(this, "app_frontend", new SimpleKubernetesWebAppConfig()
+                                .setImage("nginx:latest")
+                                .setReplicas(3)
+                                .setApp("myapp")
+                                .setComponent("frontend")
+                                .setEnvironment("dev")
+                                .setPort(30001));
 
-        new KubernetesNodePortService(this, "service", new KubernetesNodePortServiceConfig()
-                .setPort(30001)
-                .setApp("myapp")
-                .setComponent("frontend")
-                .setEnvironment("dev"));
-    }
+        }
 }
