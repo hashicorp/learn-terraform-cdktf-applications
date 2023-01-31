@@ -11,32 +11,23 @@ namespace MyCompany.MyApp
 {
     class MainStack : TerraformStack
     {
-        public MainStack(Construct scope, string id) : base(scope, id)
+        public MainStack(Construct scope, string id, SimpleKubernetesWebAppConfig frontendConfig, SimpleKubernetesWebAppConfig backendConfig) : base(scope, id)
         {
             new KubernetesProvider(this, "k8s", new KubernetesProviderConfig
             {
                 ConfigPath = Path.Join(Environment.CurrentDirectory, "../kubeconfig.yaml"),
             });
 
-            SimpleKubernetesWebApp appBackend = new SimpleKubernetesWebApp(this, "app_backend", new SimpleKubernetesWebAppConfig
-            {
-                Image = "localhost:5000/nocorp-backend:latest",
-                Replicas = 1,
-                App = "myapp",
-                Component = "backend",
-                Environment = "dev",
-                Port = 30002,
-                Env = new Dictionary<string, string> { }
-            });
+            SimpleKubernetesWebApp appBackend = new SimpleKubernetesWebApp(this, "app_backend", backendConfig);
 
             new SimpleKubernetesWebApp(this, "app_frontend", new SimpleKubernetesWebAppConfig
             {
-                Image = "localhost:5000/nocorp-frontend:latest",
-                Replicas = 3,
-                App = "myapp",
-                Component = "frontend",
-                Environment = "dev",
-                Port = 30001,
+                Image = frontendConfig.Image,
+                Replicas = frontendConfig.Replicas,
+                App = frontendConfig.App,
+                Component = frontendConfig.Component,
+                Environment = frontendConfig.Environment,
+                Port = frontendConfig.Port,
                 Env = new Dictionary<string, string> {
                     { "BACKEND_URL", $"http://localhost:{appBackend.Config.Port}" }
                 }
