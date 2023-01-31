@@ -13,58 +13,42 @@ import com.mycompany.constructs.SimpleKubernetesWebApp;
 import com.mycompany.constructs.SimpleKubernetesWebAppConfig;
 
 public class SimpleKubernetesWebAppTest {
-    @Test
-    void containsServiceResource() {
-        TerraformStack stack = new TerraformStack(Testing.app(), "stack");
+        @Test
+        void containsServiceResource() {
+                TerraformStack stack = new TerraformStack(Testing.app(), "stack");
 
-        new SimpleKubernetesWebApp(stack, "myapp-test",
-                new SimpleKubernetesWebAppConfig()
-                        .setService(
-                                new KubernetesNodePortServiceConfig()
-                                        .setPort(30001)
-                                        .setApp("myapp")
-                                        .setComponent("frontend")
-                                        .setEnvironment("dev"))
-                        .setDeployment(
-                                new KubernetesWebAppDeploymentConfig()
-                                        .setImage("nginx:latest")
-                                        .setReplicas(4)
-                                        .setApp("myapp")
-                                        .setComponent("frontend")
-                                        .setEnvironment("dev")
+                new SimpleKubernetesWebApp(stack, "myapp-test",
+                                new SimpleKubernetesWebAppConfig()
+                                                .setReplicas(4)
+                                                .setPort(30001)
+                                                .setApp("myapp")
+                                                .setComponent("frontend")
+                                                .setEnvironment("dev")
+                                                .setImage("nginx:latest"));
 
-                        ));
+                String synthesized = Testing.synth(stack);
 
-        String synthesized = Testing.synth(stack);
+                assertTrue(Testing.toHaveResource(synthesized, Service.TF_RESOURCE_TYPE));
 
-        assertTrue(Testing.toHaveResource(synthesized, Service.TF_RESOURCE_TYPE));
+        }
 
-    }
+        @Test
+        void containsDeploymentResource() {
+                TerraformStack stack = new TerraformStack(Testing.app(), "stack");
 
-    @Test
-    void containsDeploymentResource() {
-        TerraformStack stack = new TerraformStack(Testing.app(), "stack");
+                new SimpleKubernetesWebApp(stack, "myapp-test",
+                                new SimpleKubernetesWebAppConfig()
+                                                .setReplicas(4)
+                                                .setPort(30001)
+                                                .setApp("myapp")
+                                                .setComponent("frontend")
+                                                .setEnvironment("dev")
+                                                .setImage("nginx:latest")
 
-        new SimpleKubernetesWebApp(stack, "myapp-test",
-                new SimpleKubernetesWebAppConfig()
-                        .setService(
-                                new KubernetesNodePortServiceConfig()
-                                        .setPort(30001)
-                                        .setApp("myapp")
-                                        .setComponent("frontend")
-                                        .setEnvironment("dev"))
-                        .setDeployment(
-                                new KubernetesWebAppDeploymentConfig()
-                                        .setImage("nginx:latest")
-                                        .setReplicas(4)
-                                        .setApp("myapp")
-                                        .setComponent("frontend")
-                                        .setEnvironment("dev")
+                );
 
-                        ));
+                String synthesized = Testing.synth(stack);
 
-        String synthesized = Testing.synth(stack);
-
-        assertTrue(Testing.toHaveResource(synthesized, Deployment.TF_RESOURCE_TYPE));
-    }
+                assertTrue(Testing.toHaveResource(synthesized, Deployment.TF_RESOURCE_TYPE));
+        }
 }

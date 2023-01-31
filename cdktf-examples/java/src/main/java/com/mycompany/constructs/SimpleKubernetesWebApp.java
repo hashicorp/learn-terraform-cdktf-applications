@@ -18,12 +18,22 @@ public class SimpleKubernetesWebApp extends Construct {
 
         this.config = config;
 
-        this.deployment = new KubernetesWebAppDeployment(this, "deployment", config.deployment());
+        this.deployment = new KubernetesWebAppDeployment(this, "deployment", new KubernetesWebAppDeploymentConfig()
+                .setImage(config.image())
+                .setReplicas(config.replicas())
+                .setApp(config.app())
+                .setComponent(config.component())
+                .setEnvironment(config.environment())
+                .setEnv(config.env()));
 
-        this.service = new KubernetesNodePortService(this, "service", config.service());
+        this.service = new KubernetesNodePortService(this, "service", new KubernetesNodePortServiceConfig()
+                .setApp(config.app())
+                .setComponent(config.component())
+                .setEnvironment(config.environment())
+                .setPort(config.port()));
 
         new TerraformOutput(this, "url", TerraformOutputConfig.builder()
-                .value(String.format("http://localhost:%s", config.service().port())).build());
+                .value(String.format("http://localhost:%s", config.port())).build());
     }
 
 }
