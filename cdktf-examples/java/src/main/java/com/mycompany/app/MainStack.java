@@ -14,7 +14,7 @@ public class MainStack extends TerraformStack {
                 .configPath(new File("../../kubeconfig.yaml").getAbsolutePath())
                 .build());
 
-        new KubernetesWebApp(this, "deployment", new KubernetesWebAppDeploymentConfig()
+        new KubernetesWebAppDeployment(this, "deployment", new KubernetesWebAppDeploymentConfig()
                 .setImage("nginx:latest")
                 .setReplicas(2)
                 .setApp("myapp")

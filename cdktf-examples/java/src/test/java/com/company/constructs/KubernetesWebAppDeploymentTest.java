@@ -4,19 +4,19 @@ import org.junit.jupiter.api.Test;
 
 import com.hashicorp.cdktf.TerraformStack;
 import com.hashicorp.cdktf.Testing;
-import com.mycompany.constructs.KubernetesWebApp;
+import com.mycompany.constructs.KubernetesWebAppDeployment;
 import com.mycompany.constructs.KubernetesWebAppDeploymentConfig;
 import com.hashicorp.cdktf.providers.kubernetes.deployment.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class KubernetesWebAppTest {
+public class KubernetesWebAppDeploymentTest {
 
     @Test
     void containsDeploymentResource() {
         TerraformStack stack = new TerraformStack(Testing.app(), "stack");
 
-        new KubernetesWebApp(stack, "myapp-test",
+        new KubernetesWebAppDeployment(stack, "myapp-test",
                 new KubernetesWebAppDeploymentConfig()
                         .setImage("nginx:latest")
                         .setReplicas(4)
