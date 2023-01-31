@@ -1,41 +1,35 @@
 using Xunit;
 using HashiCorp.Cdktf;
 using System;
+using System.IO;
 using System.Collections.Generic;
-
+using HashiCorp.Cdktf.Providers.Kubernetes.Provider;
+using HashiCorp.Cdktf.Providers.Kubernetes.Service;
 namespace MyCompany.MyApp
 {
     // The tests below are example tests, you can find more information at
     // https://cdk.tf/testing
     public class TestProgram
     {
-
         [Fact]
-        public void myAppTest()
+        public void kuberentesNodePortServiceShouldContainService()
         {
-            Assert.True(true);
+            TerraformStack stack = new TerraformStack(Testing.App(), "stack");
+            new KubernetesProvider(stack, "k8s", new KubernetesProviderConfig
+            {
+                ConfigPath = Path.Join(Environment.CurrentDirectory, "../kubeconfig.yaml"),
+            });
+
+            new KubernetesNodePortService(stack, "service", new KubernetesNodePortServiceConfig
+            {
+                Port = 30001,
+                App = "myapp",
+                Component = "frontend",
+                Environment = "dev",
+            });
+
+            string synthesized = Testing.Synth(stack);
+            Assert.True(Testing.ToHaveResource(synthesized, Service.TfResourceType));
         }
-
-        //private static TerraformStack stack = new TerraformStack(Testing.app(), "stack");
-        //private static MyApplicationsAbstraction appAbstraction = new MyApplicationsAbstraction(stack, "construct");
-        //private static string synthesized = Testing.synth(stack);
-
-        //[Fact]
-        //public void CheckValidity(){
-        //    Assert.True(Testing.ToBeValidTerraform(Testing.FullSynth(stack)) );
-        //}
-
-        //[Fact]
-        //public void shouldContainContainer(){
-        //    Assert.True(Testing.ToHaveResource(synthesized, Container.TfResourceType) );
-        //}
-
-        //[Fact]
-        //public void shouldUseUbuntuImage(){
-        //    Assert.True(Testing.ToHaveResourceWithProperties(synthesized, Image.TfResourceType, new Dictionary<String, Object>() {
-        //       {"name", "ubuntu:latest"}
-        //    }) );
-        //}
     }
-
 }

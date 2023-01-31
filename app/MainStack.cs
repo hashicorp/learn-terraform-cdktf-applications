@@ -26,7 +26,15 @@ namespace MyCompany.MyApp
                 App = "myapp",
                 Component = "frontend",
                 Environment = "dev",
-                Env = new Dictionary<string, string> {}
+                Env = new Dictionary<string, string> { }
+            });
+
+            new KubernetesNodePortService(this, "service", new KubernetesNodePortServiceConfig
+            {
+                Port = 30001,
+                App = "myapp",
+                Component = "frontend",
+                Environment = "dev",
             });
         }
     }
