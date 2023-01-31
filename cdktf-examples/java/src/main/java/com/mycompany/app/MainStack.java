@@ -15,7 +15,7 @@ public class MainStack extends TerraformStack {
                                 .build());
 
                 new SimpleKubernetesWebApp(this, "app_frontend", new SimpleKubernetesWebAppConfig()
-                                .setImage("nginx:latest")
+                                .setImage("localhost:5000/nocorp-frontend:latest")
                                 .setReplicas(3)
                                 .setApp("myapp")
                                 .setComponent("frontend")
