@@ -18,16 +18,28 @@ namespace MyCompany.MyApp
                 ConfigPath = Path.Join(Environment.CurrentDirectory, "../kubeconfig.yaml"),
             });
 
+            SimpleKubernetesWebApp appBackend = new SimpleKubernetesWebApp(this, "app_backend", new SimpleKubernetesWebAppConfig
+            {
+                Image = "localhost:5000/nocorp-backend:latest",
+                Replicas = 1,
+                App = "myapp",
+                Component = "backend",
+                Environment = "dev",
+                Port = 30002,
+                Env = new Dictionary<string, string> { }
+            });
 
             new SimpleKubernetesWebApp(this, "app_frontend", new SimpleKubernetesWebAppConfig
             {
-                Image = "nginx:latest",
+                Image = "localhost:5000/nocorp-frontend:latest",
                 Replicas = 3,
                 App = "myapp",
                 Component = "frontend",
                 Environment = "dev",
                 Port = 30001,
-                Env = new Dictionary<string, string> { }
+                Env = new Dictionary<string, string> {
+                    { "BACKEND_URL", $"http://localhost:{appBackend.Config.Port}" }
+                }
             });
         }
     }
