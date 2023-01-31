@@ -92,3 +92,52 @@ $ mvn test
 [INFO] Finished at: 2023-01-31T16:28:56+01:00
 [INFO] ------------------------------------------------------------------------
 ```
+
+```shell
+
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------------------< com.mycompany.app:app >------------------------
+[INFO] Building app 0.1
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ app ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /Users/mutahhir/src/hc/learn-terraform-cdktf-applications/cdktf-examples/java/src/main/resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.8.1:compile (default-compile) @ app ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 6 source files to /Users/mutahhir/src/hc/learn-terraform-cdktf-applications/cdktf-examples/java/target/classes
+[INFO]
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ app ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /Users/mutahhir/src/hc/learn-terraform-cdktf-applications/cdktf-examples/java/src/test/resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.8.1:testCompile (default-testCompile) @ app ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 3 source files to /Users/mutahhir/src/hc/learn-terraform-cdktf-applications/cdktf-examples/java/target/test-classes
+[INFO]
+[INFO] --- maven-surefire-plugin:2.22.0:test (default-test) @ app ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.company.app.MainTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s - in com.company.app.MainTest
+[INFO] Running com.company.constructs.KubernetesWebAppTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.544 s - in com.company.constructs.KubernetesWebAppTest
+[INFO] Running com.company.constructs.KubernetesNodePortServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s - in com.company.constructs.KubernetesNodePortServiceTest
+
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.714 s
+[INFO] Finished at: 2023-01-31T16:54:47+01:00
+[INFO] ------------------------------------------------------------------------
+```
