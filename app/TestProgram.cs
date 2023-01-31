@@ -3,16 +3,19 @@ using HashiCorp.Cdktf;
 using System;
 using System.Collections.Generic;
 
-namespace MyCompany.MyApp{
+namespace MyCompany.MyApp
+{
     // The tests below are example tests, you can find more information at
     // https://cdk.tf/testing
-    public class TestProgram{
-        
+    public class TestProgram
+    {
+
         [Fact]
-        public void myAppTest(){
+        public void myAppTest()
+        {
             Assert.True(true);
         }
-        
+
         //private static TerraformStack stack = new TerraformStack(Testing.app(), "stack");
         //private static MyApplicationsAbstraction appAbstraction = new MyApplicationsAbstraction(stack, "construct");
         //private static string synthesized = Testing.synth(stack);
