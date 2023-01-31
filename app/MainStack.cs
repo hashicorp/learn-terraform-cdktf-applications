@@ -19,22 +19,15 @@ namespace MyCompany.MyApp
             });
 
 
-            new KubernetesWebAppDeployment(this, "deployment", new KubernetesWebAppDeploymentConfig
+            new SimpleKubernetesWebApp(this, "app_frontend", new SimpleKubernetesWebAppConfig
             {
                 Image = "nginx:latest",
-                Replicas = 2,
+                Replicas = 3,
                 App = "myapp",
                 Component = "frontend",
                 Environment = "dev",
-                Env = new Dictionary<string, string> { }
-            });
-
-            new KubernetesNodePortService(this, "service", new KubernetesNodePortServiceConfig
-            {
                 Port = 30001,
-                App = "myapp",
-                Component = "frontend",
-                Environment = "dev",
+                Env = new Dictionary<string, string> { }
             });
         }
     }
