@@ -12,7 +12,7 @@ import com.mycompany.constructs.SimpleKubernetesWebAppConfig;
 import software.constructs.Construct;
 
 public class MyStack extends TerraformStack {
-        public MyStack(final Construct scope, final String id) {
+        public MyStack(final Construct scope, final String id, final MyStackConfig config) {
                 super(scope, id);
 
                 new KubernetesProvider(this, "provider", KubernetesProviderConfig.builder()
@@ -20,23 +20,13 @@ public class MyStack extends TerraformStack {
                                 .build());
 
                 SimpleKubernetesWebApp app_backend = new SimpleKubernetesWebApp(this, "app_backend",
-                                new SimpleKubernetesWebAppConfig()
-                                                .setImage("localhost:5000/nocorp-backend:latest")
-                                                .setReplicas(1)
-                                                .setApp("myapp")
-                                                .setComponent("backend")
-                                                .setEnvironment("dev")
-                                                .setPort(30002));
+                                config.getBackend());
 
-                new SimpleKubernetesWebApp(this, "app_frontend", new SimpleKubernetesWebAppConfig()
-                                .setImage("localhost:5000/nocorp-frontend:latest")
-                                .setReplicas(3)
-                                .setApp("myapp")
-                                .setComponent("frontend")
-                                .setEnvironment("dev")
-                                .setPort(30001)
-                                .setEnv(Map.of("BACKEND_APP_URL",
-                                                String.format("http://localhost:%d", app_backend.config.port()))));
+                new SimpleKubernetesWebApp(this, "app_frontend",
+                                config.getFrontend()
+                                                .setEnv(Map.of("BACKEND_APP_URL",
+                                                                String.format("http://localhost:%d",
+                                                                                app_backend.config.port()))));
 
         }
 }
