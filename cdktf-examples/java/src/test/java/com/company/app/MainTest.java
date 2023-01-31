@@ -1,4 +1,5 @@
-import com.hashicorp.cdktf.Testing;
+package com.company.app;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,29 +11,32 @@ public class MainTest {
     void myAppTest() {
         assertTrue(true);
     }
-    //private final TerraformStack stack = new TerraformStack(Testing.app(), "stack");
-    
-    //private final MyApplicationsAbstraction appAbstraction = new MyApplicationsAbstraction(stack, "resource");
-    //private final String synthesized = Testing.synth(stack);
+    // private final TerraformStack stack = new TerraformStack(Testing.app(),
+    // "stack");
 
-    //@Test
-    //void shouldContainContainer() {
-    //    assertTrue(Testing.toHaveResource(synthesized, Container.TF_RESOURCE_TYPE) );
-    //}
+    // private final MyApplicationsAbstraction appAbstraction = new
+    // MyApplicationsAbstraction(stack, "resource");
+    // private final String synthesized = Testing.synth(stack);
 
-    //@Test
-    //void shouldUseUbuntuImage() {
-    //    assertTrue(Testing
-    //            .toHaveResourceWithProperties(synthesized, Image.TF_RESOURCE_TYPE, new HashMap<String, Object>() {
-    //                {
-    //                    put("name", "ubuntu:latest");
-    //                }
-    //            }) );
-    //}
+    // @Test
+    // void shouldContainContainer() {
+    // assertTrue(Testing.toHaveResource(synthesized, Container.TF_RESOURCE_TYPE) );
+    // }
 
-    //@Test
-    //void checkValidity() {
-    //    assertTrue(Testing.toBeValidTerraform(Testing.fullSynth(stack)) );
-    //}
+    // @Test
+    // void shouldUseUbuntuImage() {
+    // assertTrue(Testing
+    // .toHaveResourceWithProperties(synthesized, Image.TF_RESOURCE_TYPE, new
+    // HashMap<String, Object>() {
+    // {
+    // put("name", "ubuntu:latest");
+    // }
+    // }) );
+    // }
+
+    // @Test
+    // void checkValidity() {
+    // assertTrue(Testing.toBeValidTerraform(Testing.fullSynth(stack)) );
+    // }
 
 }
