@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 // https://tetris.fandom.com/wiki/Tetris_Guideline
 
 // rotate an NxN matrix 90deg
